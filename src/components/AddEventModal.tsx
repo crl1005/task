@@ -21,7 +21,7 @@ export default function AddEventModal({ form, notifPermission, onChange, onSave,
         <div style={{ fontSize:15,fontWeight:600,color:"#1a1a1a",marginBottom:16 }}>New Event</div>
         {notifPermission === "granted" && (
           <div style={{ display:"flex",alignItems:"center",gap:8,padding:"8px 10px",marginBottom:12,background:"#EBF5EF",border:"1px solid #6BA67A33",borderRadius:8 }}>
-            <span>🔔</span><span style={{ fontSize:11,color:"#6BA67A" }}>You'll be notified when this event starts.</span>
+            <span style={{ fontSize:11,color:"#6BA67A" }}>Notifications are enabled for this event.</span>
           </div>
         )}
         <input autoFocus placeholder="Event title" value={form.title} onChange={(e) => onChange({ ...form, title: e.target.value })} onKeyDown={(e) => e.key === "Enter" && onSave()} style={inputStyle} />

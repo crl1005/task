@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { CalEvent, AddFormState, HOUR_HEIGHT, START_HOUR, END_HOUR, TIME_COL_W, DAY_LABELS, MONTHS, PALETTE } from "./types";
-import { getWeekStart, addDays, toDateStr, fmtHour, computeLayout, makeSampleEvents, loadEventsFromStorage, saveEventsToStorage } from "./utils";
+import { getWeekStart, addDays, toDateStr, fmtHour, computeLayout, makeSampleEvents, loadEventsFromStorage, saveEventsToStorage, getPHDateParts } from "./utils";
 import { useNotifications } from "./useNotifications";
 import AddEventModal from "./AddEventModal";
 import EventDetailModal from "./EventDetailModal";
@@ -17,7 +17,7 @@ export default function CalendarApp() {
   const [nowTime, setNowTime] = useState(new Date());
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrolledRef = useRef(false);
-  const { permission, requestPermission } = useNotifications(events);
+  const { permission, enabled, toggleEnabled } = useNotifications(events);
 
   useEffect(() => {
     setMounted(true);
@@ -27,7 +27,8 @@ export default function CalendarApp() {
 
   useEffect(() => {
     if (!mounted || scrolledRef.current || !scrollRef.current) return;
-    const h = nowTime.getHours() + nowTime.getMinutes() / 60;
+    const nowParts = getPHDateParts(nowTime);
+    const h = nowParts.hours + nowParts.minutes / 60;
     scrollRef.current.scrollTop = Math.max(0, (h - START_HOUR - 1.5) * HOUR_HEIGHT);
     scrolledRef.current = true;
   }, [mounted, nowTime]);
@@ -47,7 +48,8 @@ export default function CalendarApp() {
   const today = new Date();
   const todayStr = toDateStr(today);
   const isCurrentWeek = toDateStr(getWeekStart(today)) === toDateStr(weekStart);
-  const nowTop = isCurrentWeek ? (nowTime.getHours() + nowTime.getMinutes() / 60 - START_HOUR) * HOUR_HEIGHT : null;
+  const nowParts = getPHDateParts(nowTime);
+  const nowTop = isCurrentWeek ? (nowParts.hours + nowParts.minutes / 60 - START_HOUR) * HOUR_HEIGHT : null;
   const weekEnd = weekDays[6];
   const monthLabel = weekStart.getMonth() === weekEnd.getMonth()
     ? `${MONTHS[weekStart.getMonth()]} ${weekStart.getFullYear()}`
@@ -68,7 +70,11 @@ export default function CalendarApp() {
     setAddForm(null);
   };
 
-  const notifLabel = permission === "granted" ? "🔔 ON" : permission === "denied" ? "🔕 BLOCKED" : "🔔 NOTIFY";
+  const notifLabel = permission === "granted"
+    ? (enabled ? "Notifications ON" : "Notifications OFF")
+    : permission === "denied"
+      ? "Notifications BLOCKED"
+      : "Notifications OFF";
   const notifColor = permission === "granted" ? "#6BA67A" : permission === "denied" ? "#B86060" : "#555";
 
   if (!mounted) return null;
@@ -91,8 +97,9 @@ export default function CalendarApp() {
             </button>
           </div>
           <div style={{ display:"flex",gap:6 }}>
-            <button className="nav-btn" onClick={() => { setRefDate(new Date()); if (scrollRef.current) { const n=new Date(); scrollRef.current.scrollTop=Math.max(0,(n.getHours()+n.getMinutes()/60-START_HOUR-1.5)*HOUR_HEIGHT); } }} style={{ padding:"6px 14px",width:"auto",fontSize:11,fontWeight:700,letterSpacing:"0.08em",border:"1px solid #e0ded8",background:"#fff",color:"#555",borderRadius:6,cursor:"pointer" }}>TODAY</button>
-            <button onClick={requestPermission} style={{ padding:"6px 12px",fontSize:11,fontWeight:700,letterSpacing:"0.06em",border:`1px solid ${notifColor}`,background:"#fff",color:notifColor,borderRadius:6,cursor:"pointer",fontFamily:"monospace" }}>{notifLabel}</button>
+            <button className="nav-btn" onClick={() => { setRefDate(new Date()); const now = new Date(); const phNow = getPHDateParts(now); if (scrollRef.current) { scrollRef.current.scrollTop = Math.max(0, (phNow.hours + phNow.minutes / 60 - START_HOUR - 1.5) * HOUR_HEIGHT); } }} style={{ padding:"6px 14px",width:"auto",fontSize:11,fontWeight:700,letterSpacing:"0.08em",border:"1px solid #e0ded8",background:"#fff",color:"#555",borderRadius:6,cursor:"pointer" }}>TODAY</button>
+            <button className="nav-btn" onClick={() => setAddForm({ date: todayStr, startHour: START_HOUR, endHour: START_HOUR + 1, title: "", paletteIdx: Math.floor(Math.random() * PALETTE.length) })} style={{ padding:"6px 14px",width:"auto",fontSize:11,fontWeight:700,letterSpacing:"0.08em",border:"1px solid #e0ded8",background:"#fff",color:"#555",borderRadius:6,cursor:"pointer" }}>NEW EVENT</button>
+            <button onClick={toggleEnabled} style={{ padding:"6px 12px",fontSize:11,fontWeight:700,letterSpacing:"0.06em",border:`1px solid ${notifColor}`,background:"#fff",color:notifColor,borderRadius:6,cursor:"pointer",fontFamily:"monospace" }}>{notifLabel}</button>
           </div>
         </header>
 

@@ -1,20 +1,39 @@
 import { CalEvent, PALETTE, START_HOUR, END_HOUR, HOUR_HEIGHT } from "./types";
 
+const PH_OFFSET_MS = 8 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export function getPHDateParts(date: Date) {
+  const ph = new Date(date.getTime() + PH_OFFSET_MS);
+  return {
+    year: ph.getUTCFullYear(),
+    month: ph.getUTCMonth(),
+    day: ph.getUTCDate(),
+    dow: ph.getUTCDay(),
+    hours: ph.getUTCHours(),
+    minutes: ph.getUTCMinutes(),
+    seconds: ph.getUTCSeconds(),
+  };
+}
+
 export function getWeekStart(date: Date): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() - d.getDay());
-  d.setHours(0, 0, 0, 0);
-  return d;
+  const parts = getPHDateParts(date);
+  const sundayUtc = Date.UTC(parts.year, parts.month, parts.day, 0, 0, 0) - PH_OFFSET_MS - parts.dow * DAY_MS;
+  return new Date(sundayUtc);
 }
 
 export function addDays(date: Date, n: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + n);
-  return d;
+  return new Date(date.getTime() + n * DAY_MS);
 }
 
 export function toDateStr(date: Date): string {
-  return date.toISOString().split("T")[0];
+  const parts = getPHDateParts(date);
+  return `${parts.year}-${String(parts.month + 1).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+}
+
+export function fromDateStr(date: string): Date {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day, 0, 0, 0) - PH_OFFSET_MS);
 }
 
 export function fmtHour(h: number): string {
