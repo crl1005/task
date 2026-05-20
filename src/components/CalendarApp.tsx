@@ -47,6 +47,19 @@ export default function CalendarApp() {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const today = new Date();
   const todayStr = toDateStr(today);
+  const resetSampleEvents = useCallback(() => {
+    persistEvents(makeSampleEvents(weekStart));
+  }, [persistEvents, weekStart]);
+  const clearAllEvents = useCallback(() => {
+    if (typeof window !== "undefined" && window.confirm("Are you sure you want to clear all events?")) {
+      persistEvents([]);
+    }
+  }, [persistEvents]);
+  const openAddEvent = useCallback(() => {
+    const now = getPHDateParts(new Date());
+    const startHour = Math.min(Math.max(Math.ceil(now.hours + now.minutes / 60), START_HOUR), END_HOUR - 1);
+    setAddForm({ date: todayStr, startHour, endHour: Math.min(startHour + 1, END_HOUR), title: "", paletteIdx: Math.floor(Math.random() * PALETTE.length) });
+  }, [todayStr]);
   const isCurrentWeek = toDateStr(getWeekStart(today)) === toDateStr(weekStart);
   const nowParts = getPHDateParts(nowTime);
   const nowTop = isCurrentWeek ? (nowParts.hours + nowParts.minutes / 60 - START_HOUR) * HOUR_HEIGHT : null;
@@ -76,30 +89,34 @@ export default function CalendarApp() {
       ? "Notifications BLOCKED"
       : "Notifications OFF";
   const notifColor = permission === "granted" ? "#6BA67A" : permission === "denied" ? "#B86060" : "#555";
+  const hasEvents = events.length > 0;
 
   if (!mounted) return null;
 
   return (
     <>
       <style>{`.nav-btn:hover{background:#f0eeea!important}.event-chip:hover{filter:brightness(0.93)}`}</style>
-      <div style={{ display:"flex",flexDirection:"column",height:"100vh",background:"#f5f4f0",overflow:"hidden" }}>
+      <div style={{ display:"flex",flexDirection:"column",height:"100vh",background:"linear-gradient(180deg, #f7f6f2 0%, #f5f4f0 40%, #f5f4f0 100%)",overflow:"hidden" }}>
 
         {/* TOPBAR */}
-        <header style={{ display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 24px",height:56,background:"#fff",borderBottom:"1px solid #e8e6e0",flexShrink:0,zIndex:20 }}>
-          <span style={{ fontFamily:"monospace",fontSize:11,fontWeight:600,letterSpacing:"0.18em",color:"#aaa9a5" }}>SCHEDULE</span>
-          <div style={{ display:"flex",alignItems:"center",gap:10 }}>
-            <button className="nav-btn" onClick={() => setRefDate((d) => addDays(d, -7))} style={{ width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center",background:"#fff",border:"1px solid #e0ded8",borderRadius:6,cursor:"pointer",color:"#888" }} aria-label="Previous week">
-              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M9 11.5L5 7.5l4-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
-            <span style={{ minWidth:176,textAlign:"center",fontSize:14,fontWeight:600,letterSpacing:"-0.01em",color:"#1a1a1a" }}>{monthLabel}</span>
-            <button className="nav-btn" onClick={() => setRefDate((d) => addDays(d, 7))} style={{ width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center",background:"#fff",border:"1px solid #e0ded8",borderRadius:6,cursor:"pointer",color:"#888" }} aria-label="Next week">
-              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M6 3.5l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
+        <header style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 24px",minHeight:92,background:"#fff",borderBottom:"1px solid #e8e6e0",flexShrink:0,zIndex:20,overflow:"hidden" }}>
+          <div style={{ position:"absolute",top:-18,left:-24,width:110,height:110,borderRadius:"50%",background:"#d7eefc",opacity:0.55 }} />
+          <div style={{ position:"absolute",top:10,right:-30,width:140,height:140,borderRadius:"50%",background:"#f7e6e2",opacity:0.45 }} />
+          <div style={{ position:"relative",zIndex:1,display:"flex",flexDirection:"column",gap:6 }}>
+            <span style={{ fontFamily:"monospace",fontSize:12,fontWeight:700,letterSpacing:"0.2em",color:"#9a9a9a" }}>SCHEDULE</span>
+            <div style={{ display:"flex",alignItems:"center",gap:14,flexWrap:"wrap" }}>
+              <div style={{ fontSize:18,fontWeight:700,color:"#1a1a1a" }}>Weekly Planner</div>
+              <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+                <span style={{ fontSize:11,fontWeight:700,padding:"6px 10px",borderRadius:999,background:"#eef6ff",color:"#346caa" }}>Philippine time</span>
+                <span style={{ fontSize:11,fontWeight:700,padding:"6px 10px",borderRadius:999,background:"#fdf2e8",color:"#a35a3f" }}>{events.length} events total</span>
+              </div>
+            </div>
           </div>
-          <div style={{ display:"flex",gap:6 }}>
-            <button className="nav-btn" onClick={() => { setRefDate(new Date()); const now = new Date(); const phNow = getPHDateParts(now); if (scrollRef.current) { scrollRef.current.scrollTop = Math.max(0, (phNow.hours + phNow.minutes / 60 - START_HOUR - 1.5) * HOUR_HEIGHT); } }} style={{ padding:"6px 14px",width:"auto",fontSize:11,fontWeight:700,letterSpacing:"0.08em",border:"1px solid #e0ded8",background:"#fff",color:"#555",borderRadius:6,cursor:"pointer" }}>TODAY</button>
-            <button className="nav-btn" onClick={() => setAddForm({ date: todayStr, startHour: START_HOUR, endHour: START_HOUR + 1, title: "", paletteIdx: Math.floor(Math.random() * PALETTE.length) })} style={{ padding:"6px 14px",width:"auto",fontSize:11,fontWeight:700,letterSpacing:"0.08em",border:"1px solid #e0ded8",background:"#fff",color:"#555",borderRadius:6,cursor:"pointer" }}>NEW EVENT</button>
-            <button onClick={toggleEnabled} style={{ padding:"6px 12px",fontSize:11,fontWeight:700,letterSpacing:"0.06em",border:`1px solid ${notifColor}`,background:"#fff",color:notifColor,borderRadius:6,cursor:"pointer",fontFamily:"monospace" }}>{notifLabel}</button>
+          <div style={{ position:"relative",zIndex:1,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap" }}>
+            <button onClick={openAddEvent} style={{ padding:"10px 16px",fontSize:12,fontWeight:700,letterSpacing:"0.06em",border:"none",background:"#1a1a1a",color:"#fff",borderRadius:8,cursor:"pointer" }}>Add event</button>
+            <button onClick={resetSampleEvents} style={{ padding:"10px 16px",fontSize:12,fontWeight:700,letterSpacing:"0.06em",border:"1px solid #e0ded8",background:"#fff",color:"#333",borderRadius:8,cursor:"pointer" }}>Reset week</button>
+            <button onClick={clearAllEvents} style={{ padding:"10px 16px",fontSize:12,fontWeight:700,letterSpacing:"0.06em",border:"1px solid #e0ded8",background:"#fff",color:"#b86060",borderRadius:8,cursor:"pointer" }} disabled={!hasEvents}>Clear all</button>
+            <button onClick={toggleEnabled} style={{ padding:"10px 16px",fontSize:12,fontWeight:700,letterSpacing:"0.06em",border:`1px solid ${notifColor}`,background:"#fff",color:notifColor,borderRadius:8,cursor:"pointer",fontFamily:"monospace" }}>{notifLabel}</button>
           </div>
         </header>
 
