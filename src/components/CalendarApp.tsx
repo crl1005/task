@@ -6,7 +6,7 @@ import { useNotifications } from "./useNotifications";
 import AddEventModal from "./AddEventModal";
 import EventDetailModal from "./EventDetailModal";
 
-interface TodoItem { id: string; text: string; done: boolean; }
+interface TodoItem { id: string; text: string; done: boolean; dueDate?: string; dueHour?: number; }
 
 const TODO_STORAGE_KEY = "schedule_todos_v1";
 const hours = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
@@ -17,6 +17,8 @@ export default function CalendarApp() {
   const [events, setEvents] = useState<CalEvent[]>([]);
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [todoText, setTodoText] = useState("");
+  const [todoDueDate, setTodoDueDate] = useState<string>("");
+  const [todoDueHour, setTodoDueHour] = useState<number>(9);
   const [selectedEvent, setSelectedEvent] = useState<CalEvent | null>(null);
   const [addForm, setAddForm] = useState<AddFormState | null>(null);
   const [nowTime, setNowTime] = useState(new Date());
@@ -63,9 +65,11 @@ export default function CalendarApp() {
 
   const addTodo = useCallback(() => {
     if (!todoText.trim()) return;
-    persistTodos([...todos, { id: `t${Date.now()}`, text: todoText.trim(), done: false }]);
+    persistTodos([...todos, { id: `t${Date.now()}`, text: todoText.trim(), done: false, dueDate: todoDueDate || undefined, dueHour: todoDueDate ? todoDueHour : undefined }]);
     setTodoText("");
-  }, [todoText, todos, persistTodos]);
+    setTodoDueDate("");
+    setTodoDueHour(9);
+  }, [todoText, todoDueDate, todoDueHour, todos, persistTodos]);
 
   const toggleTodo = useCallback((id: string) => {
     persistTodos(todos.map((todo) => todo.id === id ? { ...todo, done: !todo.done } : todo));
@@ -83,6 +87,8 @@ export default function CalendarApp() {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const today = new Date();
   const todayStr = toDateStr(today);
+  const minDueDate = todayStr;
+  const maxDueDate = toDateStr(addDays(today, 30));
   const resetSampleEvents = useCallback(() => {
     persistEvents(makeSampleEvents(weekStart));
   }, [persistEvents, weekStart]);
@@ -182,22 +188,42 @@ export default function CalendarApp() {
             </div>
             <button onClick={clearCompletedTodos} style={{ padding:"10px 14px",fontSize:12,fontWeight:700,border:"1px solid #e0ded8",background:"#fff",color:"#333",borderRadius:10,cursor:"pointer" }} disabled={!todos.some((todo) => todo.done)}>Clear completed</button>
           </div>
-          <div style={{ display:"flex",gap:10,marginBottom:16,flexWrap:"wrap" }}>
-            <input value={todoText} onChange={(e) => setTodoText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTodo()} placeholder="New task" style={{ flex:1,minWidth:0,padding:"12px 14px",border:"1px solid #e7e3dd",borderRadius:12,background:"#faf9f7",color:"#1a1a1a",fontSize:14 }} />
-            <button onClick={addTodo} style={{ padding:"12px 18px",fontSize:13,fontWeight:700,border:"none",background:"#1a1a1a",color:"#fff",borderRadius:12,cursor:"pointer" }}>Add task</button>
+          <div style={{ display:"flex",gap:10,marginBottom:16,flexWrap:"wrap",alignItems:"flex-end" }}>
+            <div style={{ flex:1,minWidth:0,display:"flex",flexDirection:"column",gap:6 }}>
+              <input value={todoText} onChange={(e) => setTodoText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTodo()} placeholder="New task" style={{ padding:"12px 14px",border:"1px solid #e7e3dd",borderRadius:12,background:"#faf9f7",color:"#1a1a1a",fontSize:14 }} />
+              <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+                <input type="date" value={todoDueDate} onChange={(e) => setTodoDueDate(e.target.value)} min={minDueDate} max={maxDueDate} style={{ padding:"10px 12px",border:"1px solid #e7e3dd",borderRadius:10,background:"#faf9f7",color:"#1a1a1a",fontSize:13 }} />
+                <select value={todoDueHour} onChange={(e) => setTodoDueHour(parseInt(e.target.value))} style={{ padding:"10px 12px",border:"1px solid #e7e3dd",borderRadius:10,background:"#faf9f7",color:"#1a1a1a",fontSize:13 }}>
+                  {Array.from({length:24},(_, i) => i).map((h) => <option key={h} value={h}>{fmtHour(h)}</option>)}
+                </select>
+              </div>
+            </div>
+            <button onClick={addTodo} style={{ padding:"12px 18px",fontSize:13,fontWeight:700,border:"none",background:"#1a1a1a",color:"#fff",borderRadius:12,cursor:"pointer",whiteSpace:"nowrap" }}>Add task</button>
           </div>
           <div style={{ display:"grid",rowGap:10 }}>
             {todos.length === 0 ? (
               <div style={{ padding:"16px 18px",borderRadius:16,background:"#fbfaf8",border:"1px dashed #e7e3dd",color:"#6f6a61" }}>No tasks yet. Add a quick todo to keep your day on track.</div>
-            ) : todos.map((todo) => (
-              <div key={todo.id} style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"14px 16px",borderRadius:16,background:todo.done?"#f5f7f2":"#faf9f7",border:todo.done?"1px solid #d9ead4":"1px solid #e7e3dd" }}>
-                <label style={{ display:"flex",alignItems:"center",gap:12,flex:1,cursor:"pointer" }}>
-                  <input type="checkbox" checked={todo.done} onChange={() => toggleTodo(todo.id)} style={{ width:18,height:18,accentColor:"#1a1a1a" }} />
-                  <span style={{ color:todo.done?"#7a7a7a":"#1a1a1a",textDecoration:todo.done?"line-through":"none",fontSize:14 }}>{todo.text}</span>
-                </label>
-                <button onClick={() => deleteTodo(todo.id)} style={{ padding:"8px 12px",fontSize:12,fontWeight:700,border:"1px solid #e0ded8",background:"#fff",color:"#b86060",borderRadius:10,cursor:"pointer" }}>Delete</button>
-              </div>
-            ))}
+            ) : todos.sort((a, b) => {
+              if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate) || (a.dueHour || 0) - (b.dueHour || 0);
+              if (a.dueDate) return -1;
+              if (b.dueDate) return 1;
+              return 0;
+            }).map((todo) => {
+              const isOverdue = todo.dueDate && todo.dueDate < todayStr;
+              const isDueToday = todo.dueDate === todayStr;
+              return (
+                <div key={todo.id} style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"14px 16px",borderRadius:16,background:todo.done?"#f5f7f2":isOverdue?"#fce9e6":isDueToday?"#fff3e0":"#faf9f7",border:todo.done?"1px solid #d9ead4":isOverdue?"1px solid #f5c9c1":isDueToday?"1px solid #ffd9a3":"1px solid #e7e3dd" }}>
+                  <label style={{ display:"flex",alignItems:"center",gap:12,flex:1,cursor:"pointer" }}>
+                    <input type="checkbox" checked={todo.done} onChange={() => toggleTodo(todo.id)} style={{ width:18,height:18,accentColor:"#1a1a1a" }} />
+                    <div>
+                      <div style={{ color:todo.done?"#7a7a7a":"#1a1a1a",textDecoration:todo.done?"line-through":"none",fontSize:14 }}>{todo.text}</div>
+                      {todo.dueDate && <div style={{ fontSize:11,color:isOverdue?"#b86060":isDueToday?"#a35a3f":"#6f6a61",marginTop:3,fontFamily:"monospace",fontWeight:700 }}>Due {todo.dueDate} at {fmtHour(todo.dueHour || 0)} {isOverdue?"(overdue)":isDueToday?"(today)":""}</div>}
+                    </div>
+                  </label>
+                  <button onClick={() => deleteTodo(todo.id)} style={{ padding:"8px 12px",fontSize:12,fontWeight:700,border:"1px solid #e0ded8",background:"#fff",color:"#b86060",borderRadius:10,cursor:"pointer" }}>Delete</button>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -224,9 +250,11 @@ export default function CalendarApp() {
               ))}
             </div>
             {weekDays.map((day, di) => {
+              const dayStr = toDateStr(day);
               const dayEvts = eventsForDay(day);
+              const dayTodos = todos.filter((t) => t.dueDate === dayStr && !t.done).sort((a, b) => (a.dueHour || 0) - (b.dueHour || 0));
               const layout = computeLayout(dayEvts);
-              const isToday = toDateStr(day) === todayStr;
+              const isToday = dayStr === todayStr;
               return (
                 <div key={di} style={{ flex:1,position:"relative",borderLeft:"1px solid #e8e6e0",background:isToday?"#fefdf8":"#fff",cursor:"crosshair" }}
                   onClick={(e) => { if (!(e.target as HTMLElement).closest(".event-chip")) onSlotClick(e, day); }}>
@@ -239,6 +267,14 @@ export default function CalendarApp() {
                   {isToday && nowTop !== null && nowTop >= 0 && (
                     <div style={{ position:"absolute",top:nowTop,left:-1,right:0,height:2,background:"#e05b4b",zIndex:5,pointerEvents:"none" }}>
                       <div style={{ position:"absolute",left:-3,top:-3,width:8,height:8,borderRadius:"50%",background:"#e05b4b" }} />
+                    </div>
+                  )}
+                  {dayTodos.length > 0 && (
+                    <div style={{ position:"absolute",top:8,right:8,left:8,display:"grid",gap:4,zIndex:2,pointerEvents:"none" }}>
+                      {dayTodos.slice(0,3).map((todo) => (
+                        <div key={todo.id} style={{ padding:"6px 8px",borderRadius:8,background:"#e6f3ff",border:"1px solid #b3d9ff",fontSize:10,fontWeight:600,color:"#0052a3",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{todo.text}</div>
+                      ))}
+                      {dayTodos.length > 3 && <div style={{ fontSize:9,color:"#6f6a61",fontWeight:700,padding:"2px 8px" }}>+{dayTodos.length - 3} more</div>}
                     </div>
                   )}
                   {dayEvts.map((ev) => {
