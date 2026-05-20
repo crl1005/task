@@ -6,12 +6,17 @@ import { useNotifications } from "./useNotifications";
 import AddEventModal from "./AddEventModal";
 import EventDetailModal from "./EventDetailModal";
 
+interface TodoItem { id: string; text: string; done: boolean; }
+
+const TODO_STORAGE_KEY = "schedule_todos_v1";
 const hours = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
 
 export default function CalendarApp() {
   const [mounted, setMounted] = useState(false);
   const [refDate, setRefDate] = useState<Date>(new Date());
   const [events, setEvents] = useState<CalEvent[]>([]);
+  const [todos, setTodos] = useState<TodoItem[]>([]);
+  const [todoText, setTodoText] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<CalEvent | null>(null);
   const [addForm, setAddForm] = useState<AddFormState | null>(null);
   const [nowTime, setNowTime] = useState(new Date());
@@ -23,6 +28,12 @@ export default function CalendarApp() {
     setMounted(true);
     const saved = loadEventsFromStorage();
     setEvents(saved && saved.length > 0 ? saved : makeSampleEvents(getWeekStart(new Date())));
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem(TODO_STORAGE_KEY);
+        if (raw) setTodos(JSON.parse(raw));
+      } catch {}
+    }
   }, []);
 
   useEffect(() => {
@@ -42,6 +53,31 @@ export default function CalendarApp() {
     setEvents(evts);
     saveEventsToStorage(evts);
   }, []);
+
+  const persistTodos = useCallback((items: TodoItem[]) => {
+    setTodos(items);
+    if (typeof window !== "undefined") {
+      try { localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(items)); } catch {}
+    }
+  }, []);
+
+  const addTodo = useCallback(() => {
+    if (!todoText.trim()) return;
+    persistTodos([...todos, { id: `t${Date.now()}`, text: todoText.trim(), done: false }]);
+    setTodoText("");
+  }, [todoText, todos, persistTodos]);
+
+  const toggleTodo = useCallback((id: string) => {
+    persistTodos(todos.map((todo) => todo.id === id ? { ...todo, done: !todo.done } : todo));
+  }, [todos, persistTodos]);
+
+  const deleteTodo = useCallback((id: string) => {
+    persistTodos(todos.filter((todo) => todo.id !== id));
+  }, [todos, persistTodos]);
+
+  const clearCompletedTodos = useCallback(() => {
+    persistTodos(todos.filter((todo) => !todo.done));
+  }, [todos, persistTodos]);
 
   const weekStart = getWeekStart(refDate);
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -135,6 +171,33 @@ export default function CalendarApp() {
             <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.18em",color:"#8e8b86",marginBottom:10 }}>QUICK ACTIONS</div>
             <div style={{ fontSize:15,fontWeight:700,color:"#1a1a1a",marginBottom:8 }}>New event, today view, clear list</div>
             <div style={{ fontSize:13,color:"#6f6a61",lineHeight:1.6 }}>Use the buttons above to manage your week faster and keep the schedule tidy.</div>
+          </div>
+        </div>
+
+        <div style={{ padding:"20px 22px",borderRadius:24,background:"#fff",border:"1px solid #ece8e1",boxShadow:"0 18px 40px rgba(14,22,33,0.05)",marginBottom:16 }}>
+          <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:16 }}>
+            <div>
+              <div style={{ fontSize:14,fontWeight:700,color:"#1a1a1a",marginBottom:4 }}>Todo List</div>
+              <div style={{ fontSize:12,color:"#6f6a61",lineHeight:1.5 }}>Track tasks that belong to your week alongside the calendar.</div>
+            </div>
+            <button onClick={clearCompletedTodos} style={{ padding:"10px 14px",fontSize:12,fontWeight:700,border:"1px solid #e0ded8",background:"#fff",color:"#333",borderRadius:10,cursor:"pointer" }} disabled={!todos.some((todo) => todo.done)}>Clear completed</button>
+          </div>
+          <div style={{ display:"flex",gap:10,marginBottom:16,flexWrap:"wrap" }}>
+            <input value={todoText} onChange={(e) => setTodoText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTodo()} placeholder="New task" style={{ flex:1,minWidth:0,padding:"12px 14px",border:"1px solid #e7e3dd",borderRadius:12,background:"#faf9f7",color:"#1a1a1a",fontSize:14 }} />
+            <button onClick={addTodo} style={{ padding:"12px 18px",fontSize:13,fontWeight:700,border:"none",background:"#1a1a1a",color:"#fff",borderRadius:12,cursor:"pointer" }}>Add task</button>
+          </div>
+          <div style={{ display:"grid",rowGap:10 }}>
+            {todos.length === 0 ? (
+              <div style={{ padding:"16px 18px",borderRadius:16,background:"#fbfaf8",border:"1px dashed #e7e3dd",color:"#6f6a61" }}>No tasks yet. Add a quick todo to keep your day on track.</div>
+            ) : todos.map((todo) => (
+              <div key={todo.id} style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"14px 16px",borderRadius:16,background:todo.done?"#f5f7f2":"#faf9f7",border:todo.done?"1px solid #d9ead4":"1px solid #e7e3dd" }}>
+                <label style={{ display:"flex",alignItems:"center",gap:12,flex:1,cursor:"pointer" }}>
+                  <input type="checkbox" checked={todo.done} onChange={() => toggleTodo(todo.id)} style={{ width:18,height:18,accentColor:"#1a1a1a" }} />
+                  <span style={{ color:todo.done?"#7a7a7a":"#1a1a1a",textDecoration:todo.done?"line-through":"none",fontSize:14 }}>{todo.text}</span>
+                </label>
+                <button onClick={() => deleteTodo(todo.id)} style={{ padding:"8px 12px",fontSize:12,fontWeight:700,border:"1px solid #e0ded8",background:"#fff",color:"#b86060",borderRadius:10,cursor:"pointer" }}>Delete</button>
+              </div>
+            ))}
           </div>
         </div>
 
