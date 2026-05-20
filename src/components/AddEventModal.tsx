@@ -17,11 +17,12 @@ export default function AddEventModal({ form, notifPermission, onChange, onSave,
   const hourOpts = getHourOptions();
   return (
     <div onClick={onClose} style={{ position:"fixed",inset:0,zIndex:50,background:"rgba(10,10,10,0.18)",backdropFilter:"blur(2px)",display:"flex",alignItems:"center",justifyContent:"center" }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background:"#fff",borderRadius:14,padding:24,width:340,boxShadow:"0 24px 64px rgba(0,0,0,0.12)" }}>
-        <div style={{ fontSize:15,fontWeight:600,color:"#1a1a1a",marginBottom:16 }}>New Event</div>
+      <div onClick={(e) => e.stopPropagation()} style={{ background:"#fff",borderRadius:20,padding:26,width:360,boxShadow:"0 30px 80px rgba(17,22,30,0.12)" }}>
+        <div style={{ fontSize:18,fontWeight:700,color:"#1a1a1a",marginBottom:6 }}>Add event</div>
+        <div style={{ fontSize:13,color:"#6f6a61",marginBottom:18,lineHeight:1.55 }}>Create a calendar item with date, time, and a color-coded label for your weekly plan.</div>
         {notifPermission === "granted" && (
-          <div style={{ display:"flex",alignItems:"center",gap:8,padding:"8px 10px",marginBottom:12,background:"#EBF5EF",border:"1px solid #6BA67A33",borderRadius:8 }}>
-            <span style={{ fontSize:11,color:"#6BA67A" }}>Notifications are enabled for this event.</span>
+          <div style={{ display:"flex",alignItems:"center",gap:8,padding:"10px 12px",marginBottom:14,background:"#eff7f0",border:"1px solid #b7dfca",borderRadius:12 }}>
+            <span style={{ fontSize:11,color:"#4d8f6b" }}>Notifications are enabled for this event.</span>
           </div>
         )}
         <input autoFocus placeholder="Event title" value={form.title} onChange={(e) => onChange({ ...form, title: e.target.value })} onKeyDown={(e) => e.key === "Enter" && onSave()} style={inputStyle} />

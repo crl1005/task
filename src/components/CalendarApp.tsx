@@ -96,10 +96,10 @@ export default function CalendarApp() {
   return (
     <>
       <style>{`.nav-btn:hover{background:#f0eeea!important}.event-chip:hover{filter:brightness(0.93)}`}</style>
-      <div style={{ display:"flex",flexDirection:"column",height:"100vh",background:"linear-gradient(180deg, #f7f6f2 0%, #f5f4f0 40%, #f5f4f0 100%)",overflow:"hidden" }}>
+      <div style={{ display:"flex",flexDirection:"column",minHeight:"100vh",background:"linear-gradient(180deg, #eef2f4 0%, #f5f4f0 100%)",overflow:"hidden",padding:"20px 18px" }}>
 
         {/* TOPBAR */}
-        <header style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 24px",minHeight:92,background:"#fff",borderBottom:"1px solid #e8e6e0",flexShrink:0,zIndex:20,overflow:"hidden" }}>
+        <header style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"22px 28px",minHeight:110,background:"#fff",borderBottom:"1px solid #ede8e1",boxShadow:"0 18px 50px rgba(14,22,33,0.06)",borderRadius:24,flexShrink:0,zIndex:20,overflow:"hidden" }}>
           <div style={{ position:"absolute",top:-18,left:-24,width:110,height:110,borderRadius:"50%",background:"#d7eefc",opacity:0.55 }} />
           <div style={{ position:"absolute",top:10,right:-30,width:140,height:140,borderRadius:"50%",background:"#f7e6e2",opacity:0.45 }} />
           <div style={{ position:"relative",zIndex:1,display:"flex",flexDirection:"column",gap:6 }}>
@@ -120,8 +120,26 @@ export default function CalendarApp() {
           </div>
         </header>
 
+        <div style={{ display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:12,marginTop:16,marginBottom:12 }}>
+          <div style={{ padding:"18px 20px",borderRadius:18,background:"#fff",border:"1px solid #ece8e1",boxShadow:"0 18px 40px rgba(14,22,33,0.05)" }}>
+            <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.18em",color:"#8e8b86",marginBottom:10 }}>THIS WEEK</div>
+            <div style={{ fontSize:20,fontWeight:700,color:"#1a1a1a",marginBottom:6 }}>{monthLabel}</div>
+            <div style={{ fontSize:13,color:"#6f6a61",lineHeight:1.6 }}>Easy access to your current weekly schedule and upcoming items.</div>
+          </div>
+          <div style={{ padding:"18px 20px",borderRadius:18,background:"#fff",border:"1px solid #ece8e1",boxShadow:"0 18px 40px rgba(14,22,33,0.05)" }}>
+            <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.18em",color:"#8e8b86",marginBottom:10 }}>EVENTS SCHEDULED</div>
+            <div style={{ fontSize:32,fontWeight:700,color:"#1a1a1a" }}>{events.length}</div>
+            <div style={{ fontSize:13,color:"#6f6a61",lineHeight:1.6 }}>Total events saved in your planner for the current view.</div>
+          </div>
+          <div style={{ padding:"18px 20px",borderRadius:18,background:"#fff",border:"1px solid #ece8e1",boxShadow:"0 18px 40px rgba(14,22,33,0.05)" }}>
+            <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.18em",color:"#8e8b86",marginBottom:10 }}>QUICK ACTIONS</div>
+            <div style={{ fontSize:15,fontWeight:700,color:"#1a1a1a",marginBottom:8 }}>New event, today view, clear list</div>
+            <div style={{ fontSize:13,color:"#6f6a61",lineHeight:1.6 }}>Use the buttons above to manage your week faster and keep the schedule tidy.</div>
+          </div>
+        </div>
+
         {/* DAY HEADERS */}
-        <div style={{ display:"flex",background:"#fff",borderBottom:"1px solid #e8e6e0",flexShrink:0 }}>
+        <div style={{ display:"flex",background:"#fbfaf8",borderBottom:"1px solid #e8e6e0",flexShrink:0 }}>
           <div style={{ width:TIME_COL_W,flexShrink:0 }} />
           {weekDays.map((day, i) => {
             const isToday = toDateStr(day) === todayStr;
@@ -166,7 +184,7 @@ export default function CalendarApp() {
                     const height = Math.max((ev.endHour - ev.startHour) * HOUR_HEIGHT - 3, 18);
                     return (
                       <div key={ev.id} className="event-chip" onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); }}
-                        style={{ position:"absolute",top,left:`calc(${pos.left*100}% + 3px)`,width:`calc(${pos.width*100}% - 6px)`,height,background:ev.lightColor,borderLeft:`3px solid ${ev.color}`,borderRadius:"0 5px 5px 0",padding:"3px 7px 3px 6px",cursor:"pointer",zIndex:3,overflow:"hidden",transition:"filter 0.1s" }}>
+                        style={{ position:"absolute",top,left:`calc(${pos.left*100}% + 3px)`,width:`calc(${pos.width*100}% - 6px)`,height,background:ev.lightColor,borderLeft:`3px solid ${ev.color}`,borderRadius:"0 12px 12px 0",padding:"6px 10px 6px 8px",cursor:"pointer",zIndex:3,overflow:"hidden",transition:"filter 0.1s, transform 0.2s",boxShadow:"0 8px 18px rgba(17,22,30,0.08)" }}>
                         <div style={{ fontSize:11,fontWeight:600,color:ev.color,lineHeight:1.25,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:height<32?"nowrap":"normal" }}>{ev.title}</div>
                         {height >= 30 && <div style={{ fontSize:10,color:ev.color,opacity:0.7,marginTop:1,fontFamily:"monospace",whiteSpace:"nowrap" }}>{fmtHour(ev.startHour)} – {fmtHour(ev.endHour)}</div>}
                       </div>
