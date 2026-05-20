@@ -29,7 +29,7 @@ export default function CalendarApp() {
   useEffect(() => {
     setMounted(true);
     const saved = loadEventsFromStorage();
-    setEvents(saved && saved.length > 0 ? saved : makeSampleEvents(getWeekStart(new Date())));
+    setEvents(saved || []);
     if (typeof window !== "undefined") {
       try {
         const raw = localStorage.getItem(TODO_STORAGE_KEY);
@@ -137,11 +137,11 @@ export default function CalendarApp() {
 
   return (
     <>
-      <style>{`.nav-btn:hover{background:#f0eeea!important}.event-chip:hover{filter:brightness(0.93)}`}</style>
-      <div style={{ display:"flex",flexDirection:"column",minHeight:"100vh",background:"linear-gradient(180deg, #eef2f4 0%, #f5f4f0 100%)",overflow:"hidden",padding:"20px 18px" }}>
+      <style>{`.btn-primary{transition:all 0.25s ease}.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 28px rgba(26,26,26,0.18)!important}.btn-secondary:hover:not(:disabled){background:#f5f3f0!important;transform:translateY(-1px)}.btn-danger:hover:not(:disabled){background:#f5e6e6!important;transform:translateY(-1px)}.event-chip:hover{filter:brightness(0.93);transform:scale(1.01)}`}</style>
+      <div style={{ display:"flex",flexDirection:"column",minHeight:"100vh",background:"linear-gradient(180deg, #f8f7f5 0%, #f0eded 100%)",overflow:"hidden",padding:"20px 18px" }}>
 
         {/* TOPBAR */}
-        <header style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"22px 28px",minHeight:110,background:"#fff",borderBottom:"1px solid #ede8e1",boxShadow:"0 18px 50px rgba(14,22,33,0.06)",borderRadius:24,flexShrink:0,zIndex:20,overflow:"hidden" }}>
+        <header style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"24px 32px",minHeight:120,background:"linear-gradient(135deg, #fff 0%, #faf8f6 100%)",borderBottom:"2px solid #f0ede8",boxShadow:"0 24px 60px rgba(14,22,33,0.08)",borderRadius:28,flexShrink:0,zIndex:20,overflow:"hidden" }}>
           <div style={{ position:"absolute",top:-18,left:-24,width:110,height:110,borderRadius:"50%",background:"#d7eefc",opacity:0.55 }} />
           <div style={{ position:"absolute",top:10,right:-30,width:140,height:140,borderRadius:"50%",background:"#f7e6e2",opacity:0.45 }} />
           <div style={{ position:"relative",zIndex:1,display:"flex",flexDirection:"column",gap:6 }}>
@@ -154,33 +154,32 @@ export default function CalendarApp() {
               </div>
             </div>
           </div>
-          <div style={{ position:"relative",zIndex:1,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap" }}>
-            <button onClick={openAddEvent} style={{ padding:"10px 16px",fontSize:12,fontWeight:700,letterSpacing:"0.06em",border:"none",background:"#1a1a1a",color:"#fff",borderRadius:8,cursor:"pointer" }}>Add event</button>
-            <button onClick={resetSampleEvents} style={{ padding:"10px 16px",fontSize:12,fontWeight:700,letterSpacing:"0.06em",border:"1px solid #e0ded8",background:"#fff",color:"#333",borderRadius:8,cursor:"pointer" }}>Reset week</button>
-            <button onClick={clearAllEvents} style={{ padding:"10px 16px",fontSize:12,fontWeight:700,letterSpacing:"0.06em",border:"1px solid #e0ded8",background:"#fff",color:"#b86060",borderRadius:8,cursor:"pointer" }} disabled={!hasEvents}>Clear all</button>
-            <button onClick={toggleEnabled} style={{ padding:"10px 16px",fontSize:12,fontWeight:700,letterSpacing:"0.06em",border:`1px solid ${notifColor}`,background:"#fff",color:notifColor,borderRadius:8,cursor:"pointer",fontFamily:"monospace" }}>{notifLabel}</button>
+          <div style={{ position:"relative",zIndex:1,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap" }}>
+            <button onClick={openAddEvent} className="btn-primary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:"none",background:"#1a1a1a",color:"#fff",borderRadius:12,cursor:"pointer",boxShadow:"0 8px 20px rgba(26,26,26,0.15)" }}>+ Add Event</button>
+            <button onClick={clearAllEvents} className="btn-secondary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:"2px solid #e8e5de",background:"#fff",color:"#b86060",borderRadius:12,cursor:"pointer",opacity:!hasEvents?0.5:1,pointerEvents:!hasEvents?"none":"auto" }}>Clear All</button>
+            <button onClick={toggleEnabled} className="btn-secondary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:`2px solid ${notifColor}`,background:"#fff",color:notifColor,borderRadius:12,cursor:"pointer",fontFamily:"monospace" }}>{notifLabel}</button>
           </div>
         </header>
 
-        <div style={{ display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:12,marginTop:16,marginBottom:12 }}>
-          <div style={{ padding:"18px 20px",borderRadius:18,background:"#fff",border:"1px solid #ece8e1",boxShadow:"0 18px 40px rgba(14,22,33,0.05)" }}>
-            <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.18em",color:"#8e8b86",marginBottom:10 }}>THIS WEEK</div>
-            <div style={{ fontSize:20,fontWeight:700,color:"#1a1a1a",marginBottom:6 }}>{monthLabel}</div>
-            <div style={{ fontSize:13,color:"#6f6a61",lineHeight:1.6 }}>Easy access to your current weekly schedule and upcoming items.</div>
+        <div style={{ display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:14,marginTop:18,marginBottom:14 }}>
+          <div style={{ padding:"22px 24px",borderRadius:22,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 12px 35px rgba(14,22,33,0.06)",transition:"all 0.3s ease" }}>
+            <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:"#a0998f",marginBottom:12,textTransform:"uppercase" }}>This Week</div>
+            <div style={{ fontSize:24,fontWeight:700,color:"#1a1a1a",marginBottom:8,lineHeight:1.2 }}>{monthLabel}</div>
+            <div style={{ fontSize:13,color:"#7a7360",lineHeight:1.6 }}>Your current weekly schedule overview</div>
           </div>
-          <div style={{ padding:"18px 20px",borderRadius:18,background:"#fff",border:"1px solid #ece8e1",boxShadow:"0 18px 40px rgba(14,22,33,0.05)" }}>
-            <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.18em",color:"#8e8b86",marginBottom:10 }}>EVENTS SCHEDULED</div>
-            <div style={{ fontSize:32,fontWeight:700,color:"#1a1a1a" }}>{events.length}</div>
-            <div style={{ fontSize:13,color:"#6f6a61",lineHeight:1.6 }}>Total events saved in your planner for the current view.</div>
+          <div style={{ padding:"22px 24px",borderRadius:22,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 12px 35px rgba(14,22,33,0.06)",transition:"all 0.3s ease" }}>
+            <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:"#a0998f",marginBottom:12,textTransform:"uppercase" }}>Events</div>
+            <div style={{ fontSize:40,fontWeight:700,color:"#1a1a1a",marginBottom:4 }}>{events.length}</div>
+            <div style={{ fontSize:13,color:"#7a7360",lineHeight:1.6 }}>Total scheduled events</div>
           </div>
-          <div style={{ padding:"18px 20px",borderRadius:18,background:"#fff",border:"1px solid #ece8e1",boxShadow:"0 18px 40px rgba(14,22,33,0.05)" }}>
-            <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.18em",color:"#8e8b86",marginBottom:10 }}>QUICK ACTIONS</div>
-            <div style={{ fontSize:15,fontWeight:700,color:"#1a1a1a",marginBottom:8 }}>New event, today view, clear list</div>
-            <div style={{ fontSize:13,color:"#6f6a61",lineHeight:1.6 }}>Use the buttons above to manage your week faster and keep the schedule tidy.</div>
+          <div style={{ padding:"22px 24px",borderRadius:22,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 12px 35px rgba(14,22,33,0.06)",transition:"all 0.3s ease" }}>
+            <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:"#a0998f",marginBottom:12,textTransform:"uppercase" }}>Tasks</div>
+            <div style={{ fontSize:40,fontWeight:700,color:"#1a1a1a",marginBottom:4 }}>{todos.filter(t => !t.done).length}</div>
+            <div style={{ fontSize:13,color:"#7a7360",lineHeight:1.6 }}>Active to-dos pending</div>
           </div>
         </div>
 
-        <div style={{ padding:"20px 22px",borderRadius:24,background:"#fff",border:"1px solid #ece8e1",boxShadow:"0 18px 40px rgba(14,22,33,0.05)",marginBottom:16 }}>
+        <div style={{ padding:"24px 28px",borderRadius:28,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 18px 50px rgba(14,22,33,0.06)",marginBottom:16 }}>
           <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:16 }}>
             <div>
               <div style={{ fontSize:14,fontWeight:700,color:"#1a1a1a",marginBottom:4 }}>Todo List</div>
