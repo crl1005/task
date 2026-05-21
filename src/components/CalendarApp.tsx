@@ -53,22 +53,37 @@ export default function CalendarApp() {
 
   useEffect(() => {
     if (!mounted || typeof window === "undefined") return;
-    const animateEls = Array.from(document.querySelectorAll<HTMLElement>("[data-animate-on-scroll]"));
+    const animateEls = Array.from(document.querySelectorAll<HTMLElement>(".animate-on-scroll"));
     if (animateEls.length === 0) return;
 
-    const reveal = (entry: IntersectionObserverEntry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-        observer.unobserve(entry.target);
-      }
+    const root = scrollRef.current;
+    const rootRect = () => root?.getBoundingClientRect();
+
+    const isVisible = (el: HTMLElement) => {
+      if (el.classList.contains("visible")) return false;
+      const rect = el.getBoundingClientRect();
+      const containerRect = rootRect();
+      const top = containerRect ? Math.max(rect.top, containerRect.top) : rect.top;
+      const bottom = containerRect ? Math.min(rect.bottom, containerRect.bottom) : rect.bottom;
+      return bottom > top + 8;
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(reveal);
-    }, { threshold: 0.1 });
+    const revealElements = () => {
+      animateEls.forEach((el) => {
+        if (isVisible(el)) {
+          el.classList.add("visible");
+        }
+      });
+    };
 
-    animateEls.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    revealElements();
+    const handleScroll = () => requestAnimationFrame(revealElements);
+    root?.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      root?.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, [mounted]);
 
   const persistEvents = useCallback((evts: CalEvent[]) => {
