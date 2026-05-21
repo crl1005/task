@@ -352,14 +352,16 @@ export default function CalendarApp() {
               const dayTodos = todosByDate.get(dayStr) ?? [];
               const isToday = dayStr === todayStr;
               return (
-                <div key={di} className="day-column" style={{ flex:1,position:"relative",borderLeft:"1px solid #e8e6e0",background:isToday?"#fefdf8":"#fff",cursor:"crosshair" }}
+                <div key={di} className="day-column" style={{
+                  flex:1,
+                  position:"relative",
+                  borderLeft:"1px solid #e8e6e0",
+                  background:isToday?"#fefdf8":"#fff",
+                  backgroundImage:"repeating-linear-gradient(to bottom, rgba(224,222,217,0.8) 0px, rgba(224,222,217,0.8) 1px, transparent 1px, transparent 31px, rgba(247,245,240,0.9) 31px, rgba(247,245,240,0.9) 32px, transparent 32px, transparent 64px)",
+                  backgroundSize:"100% 64px",
+                  cursor:"crosshair"
+                }}
                   onClick={(e) => { if (!(e.target as HTMLElement).closest(".event-chip")) onSlotClick(e, day); }}>
-                  {hours.map((h) => (
-                    <React.Fragment key={h}>
-                      <div style={{ position:"absolute",top:(h-START_HOUR)*HOUR_HEIGHT,left:0,right:0,height:1,background:"#f0ede6",pointerEvents:"none" }} />
-                      <div style={{ position:"absolute",top:(h-START_HOUR)*HOUR_HEIGHT+HOUR_HEIGHT/2,left:0,right:0,height:1,background:"#f7f5f0",pointerEvents:"none" }} />
-                    </React.Fragment>
-                  ))}
                   {isToday && nowTop !== null && nowTop >= 0 && (
                     <div style={{ position:"absolute",top:nowTop,left:-1,right:0,height:2,background:"#e05b4b",zIndex:5,pointerEvents:"none" }}>
                       <div style={{ position:"absolute",left:-3,top:-3,width:8,height:8,borderRadius:"50%",background:"#e05b4b" }} />

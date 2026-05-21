@@ -2,11 +2,11 @@
 html, body { min-height: 100%; }
 html { scroll-behavior: smooth; }
 body { font-family: var(--font-outfit), system-ui, sans-serif; background: radial-gradient(circle at top left, rgba(230,242,255,0.95), transparent 26%), linear-gradient(180deg, #eef3f9 0%, #f5f4f0 100%); color: #1a1a1a; -webkit-font-smoothing: antialiased; position: relative; }
-body::before { content: ""; position: fixed; inset: 0; background: radial-gradient(circle at 85% 18%, rgba(255,241,225,0.5), transparent 22%), radial-gradient(circle at 18% 72%, rgba(203,225,255,0.35), transparent 20%); pointer-events: none; z-index: -1; }
+body::before { content: ""; position: fixed; inset: 0; background: radial-gradient(circle at 85% 18%, rgba(255,241,225,0.32), transparent 22%), radial-gradient(circle at 18% 72%, rgba(203,225,255,0.24), transparent 20%); pointer-events: none; z-index: -1; }
 
 /* Site container max width and responsive padding */
 .site-container { max-width: 1180px; margin: 0 auto; padding-left: 24px; padding-right: 24px; position: relative; z-index: 1; }
-.page-shell { width: 100%; max-width: 1200px; margin: 0 auto; border-radius: 34px; background: rgba(255,255,255,0.95); box-shadow: 0 40px 120px rgba(24,32,50,0.08); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.9); overflow: hidden; }
+.page-shell { width: 100%; max-width: 1200px; margin: 0 auto; border-radius: 34px; background: rgba(255,255,255,0.98); box-shadow: 0 22px 48px rgba(24,32,50,0.08); border: 1px solid rgba(255,255,255,0.9); overflow: hidden; }
 
 .btn-primary { transition: transform 0.22s ease, box-shadow 0.22s ease; box-shadow: 0 16px 34px rgba(26,26,26,0.12); border-radius: 15px; }
 .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 20px 42px rgba(26,26,26,0.18); }
@@ -25,7 +25,7 @@ body::before { content: ""; position: fixed; inset: 0; background: radial-gradie
 .time-column { min-width: 60px; background: rgba(255,255,255,0.88); }
 .day-column { min-width: 150px; flex: 1 0 150px; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(247,247,249,0.97)); }
 .day-column:hover { background: rgba(255,255,255,1); }
-.event-chip { transition: transform 0.2s ease, box-shadow 0.2s ease; border-radius: 16px; }
+.event-chip { transition: transform 0.2s ease, box-shadow 0.2s ease; border-radius: 16px; will-change: transform, opacity; }
 
 .header-note { font-size: 13px; color: #6f6b66; line-height: 1.5; max-width: 540px; margin-top: 6px; }
 
