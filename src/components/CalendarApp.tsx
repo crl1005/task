@@ -51,6 +51,25 @@ export default function CalendarApp() {
     return () => clearInterval(t);
   }, []);
 
+  // Reveal animations for page scroll — observes elements with `data-animate`.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const els = Array.from(document.querySelectorAll<HTMLElement>("[data-animate]"));
+    if (!els.length) return;
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          (entry.target as HTMLElement).classList.add("visible");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [mounted]);
+
   const persistEvents = useCallback((evts: CalEvent[]) => {
     setEvents(evts);
     saveEventsToStorage(evts);
@@ -138,10 +157,10 @@ export default function CalendarApp() {
   return (
     <>
       <style>{`.btn-primary{transition:all 0.25s ease}.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 28px rgba(26,26,26,0.18)!important}.btn-secondary:hover:not(:disabled){background:#f5f3f0!important;transform:translateY(-1px)}.btn-danger:hover:not(:disabled){background:#f5e6e6!important;transform:translateY(-1px)}.event-chip:hover{filter:brightness(0.93);transform:scale(1.01)}`}</style>
-      <div style={{ display:"flex",flexDirection:"column",minHeight:"100vh",background:"linear-gradient(180deg, #f8f7f5 0%, #f0eded 100%)",overflow:"hidden",padding:"20px 18px" }}>
+      <div className="site-container" data-animate style={{ display:"flex",flexDirection:"column",minHeight:"100vh",background:"linear-gradient(180deg, #f8f7f5 0%, #f0eded 100%)",overflow:"visible",padding:"20px 18px" }}>
 
         {/* TOPBAR */}
-        <header style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"24px 32px",minHeight:120,background:"linear-gradient(135deg, #fff 0%, #faf8f6 100%)",borderBottom:"2px solid #f0ede8",boxShadow:"0 24px 60px rgba(14,22,33,0.08)",borderRadius:28,flexShrink:0,zIndex:20,overflow:"hidden" }}>
+        <header data-animate style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"24px 32px",minHeight:120,background:"linear-gradient(135deg, #fff 0%, #faf8f6 100%)",borderBottom:"2px solid #f0ede8",boxShadow:"0 24px 60px rgba(14,22,33,0.08)",borderRadius:28,flexShrink:0,zIndex:20,overflow:"hidden" }}>
           <div style={{ position:"absolute",top:-18,left:-24,width:110,height:110,borderRadius:"50%",background:"#d7eefc",opacity:0.55 }} />
           <div style={{ position:"absolute",top:10,right:-30,width:140,height:140,borderRadius:"50%",background:"#f7e6e2",opacity:0.45 }} />
           <div style={{ position:"relative",zIndex:1,display:"flex",flexDirection:"column",gap:6 }}>
@@ -161,7 +180,7 @@ export default function CalendarApp() {
           </div>
         </header>
 
-        <div style={{ display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:14,marginTop:18,marginBottom:14 }}>
+        <div className="stats-grid" data-animate style={{ display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:14,marginTop:18,marginBottom:14 }}>
           <div style={{ padding:"22px 24px",borderRadius:22,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 12px 35px rgba(14,22,33,0.06)",transition:"all 0.3s ease" }}>
             <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:"#a0998f",marginBottom:12,textTransform:"uppercase" }}>This Week</div>
             <div style={{ fontSize:24,fontWeight:700,color:"#1a1a1a",marginBottom:8,lineHeight:1.2 }}>{monthLabel}</div>
@@ -179,7 +198,7 @@ export default function CalendarApp() {
           </div>
         </div>
 
-        <div style={{ padding:"24px 28px",borderRadius:28,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 18px 50px rgba(14,22,33,0.06)",marginBottom:16 }}>
+        <div data-animate style={{ padding:"24px 28px",borderRadius:28,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 18px 50px rgba(14,22,33,0.06)",marginBottom:16 }}>
           <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:16 }}>
             <div>
               <div style={{ fontSize:14,fontWeight:700,color:"#1a1a1a",marginBottom:4 }}>Todo List</div>
@@ -227,7 +246,7 @@ export default function CalendarApp() {
         </div>
 
         {/* DAY HEADERS */}
-        <div style={{ display:"flex",background:"#fbfaf8",borderBottom:"1px solid #e8e6e0",flexShrink:0 }}>
+        <div data-animate style={{ display:"flex",background:"#fbfaf8",borderBottom:"1px solid #e8e6e0",flexShrink:0 }}>
           <div style={{ width:TIME_COL_W,flexShrink:0 }} />
           {weekDays.map((day, i) => {
             const isToday = toDateStr(day) === todayStr;
@@ -241,7 +260,7 @@ export default function CalendarApp() {
         </div>
 
         {/* GRID */}
-        <div ref={scrollRef} style={{ flex:1,overflowY:"auto",overflowX:"hidden" }}>
+        <div ref={scrollRef} data-animate style={{ flex:1,overflowY:"auto",overflowX:"hidden" }}>
           <div style={{ display:"flex",minHeight:(END_HOUR-START_HOUR)*HOUR_HEIGHT }}>
             <div style={{ width:TIME_COL_W,flexShrink:0,position:"relative",userSelect:"none" }}>
               {hours.map((h) => (

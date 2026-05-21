@@ -1,6 +1,26 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
+html, body { height: 100%; }
+html { scroll-behavior: smooth; }
 body { font-family: var(--font-outfit), system-ui, sans-serif; background: #f5f4f0; color: #1a1a1a; -webkit-font-smoothing: antialiased; }
+
+/* Site container max width and responsive padding */
+.site-container { max-width: 1100px; margin: 0 auto; padding-left: 18px; padding-right: 18px; }
+
+/* Simple responsive grid for header stats */
+.stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; margin-bottom: 14px; }
+@media (max-width: 900px) {
+	.stats-grid { grid-template-columns: 1fr; }
+	header { padding: 18px 18px !important; border-radius: 18px !important; }
+}
+
+/* Reveal animation base */
+[data-animate] { opacity: 0; transform: translateY(16px); transition: opacity 520ms cubic-bezier(.2,.8,.2,1), transform 520ms cubic-bezier(.2,.8,.2,1); will-change: opacity, transform; }
+[data-animate].visible { opacity: 1; transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+	[data-animate] { transition: none !important; transform: none !important; opacity: 1 !important; }
+}
+
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d8d6d0; border-radius: 2px; }
