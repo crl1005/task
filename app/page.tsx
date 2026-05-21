@@ -39,7 +39,7 @@ export default function Page() {
           position: fixed;
           inset: 0;
           z-index: 100;
-          background: #f5f4f0;
+          background: radial-gradient(circle at top left, rgba(238,246,255,0.92), transparent 28%), linear-gradient(180deg, #eef2f8 0%, #f9f7f1 100%);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -85,6 +85,30 @@ export default function Page() {
           opacity: 0;
           transform: translateY(18px);
           transition: none;
+          position: relative;
+          overflow: hidden;
+        }
+        .cal-wrapper::before,
+        .cal-wrapper::after {
+          content: "";
+          position: absolute;
+          border-radius: 50%;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .cal-wrapper::before {
+          width: 360px;
+          height: 320px;
+          top: -100px;
+          left: -120px;
+          background: radial-gradient(circle, rgba(227,238,255,0.82) 0%, transparent 62%);
+        }
+        .cal-wrapper::after {
+          width: 280px;
+          height: 280px;
+          bottom: -80px;
+          right: -100px;
+          background: radial-gradient(circle, rgba(255,238,230,0.7) 0%, transparent 65%);
         }
         .cal-wrapper.visible {
           animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;

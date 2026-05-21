@@ -196,10 +196,10 @@ export default function CalendarApp() {
   return (
     <>
       <style>{`.btn-primary{transition:all 0.25s ease}.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 28px rgba(26,26,26,0.18)!important}.btn-secondary:hover:not(:disabled){background:#f5f3f0!important;transform:translateY(-1px)}.btn-danger:hover:not(:disabled){background:#f5e6e6!important;transform:translateY(-1px)}.event-chip:hover{filter:brightness(0.93);transform:scale(1.01)}`}</style>
-      <div className="site-container page-shell" data-animate style={{ display:"flex",flexDirection:"column",minHeight:"100vh",background:"linear-gradient(180deg, #f8f7f5 0%, #f0eded 100%)",overflow:"visible",padding:"20px 18px" }}>
+      <div className="site-container page-shell" data-animate style={{ display:"flex",flexDirection:"column",minHeight:"100vh",background:"radial-gradient(circle at 15% 12%, rgba(255,255,255,0.95), transparent 22%), radial-gradient(circle at 85% 18%, rgba(241,236,255,0.65), transparent 24%), linear-gradient(180deg, #fbfaf8 0%, #f4f7fb 42%, #f8f7f5 100%)",overflow:"visible",padding:"24px 24px" }}>
 
         {/* TOPBAR */}
-        <header data-animate style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"24px 32px",minHeight:120,background:"linear-gradient(135deg, #fff 0%, #faf8f6 100%)",borderBottom:"2px solid #f0ede8",boxShadow:"0 24px 60px rgba(14,22,33,0.08)",borderRadius:28,flexShrink:0,zIndex:20,overflow:"hidden" }}>
+        <header data-animate style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"24px 32px",minHeight:120,background:"rgba(255,255,255,0.92)",border:"1px solid rgba(255,255,255,0.92)",boxShadow:"0 30px 90px rgba(22,33,52,0.08)",backdropFilter:"blur(18px)",borderRadius:32,flexShrink:0,zIndex:20,overflow:"hidden" }}>
           <div style={{ position:"absolute",top:-18,left:-24,width:110,height:110,borderRadius:"50%",background:"#d7eefc",opacity:0.55 }} />
           <div style={{ position:"absolute",top:10,right:-30,width:140,height:140,borderRadius:"50%",background:"#f7e6e2",opacity:0.45 }} />
           <div style={{ position:"relative",zIndex:1,display:"flex",flexDirection:"column",gap:6 }}>
