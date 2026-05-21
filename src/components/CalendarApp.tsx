@@ -155,6 +155,10 @@ export default function CalendarApp() {
     setRefDate((current) => addDays(current, direction * 7));
   }, []);
 
+  const goToToday = useCallback(() => {
+    setRefDate(new Date());
+  }, []);
+
   const openAddEvent = useCallback(() => {
     const now = getPHDateParts(new Date());
     const startHour = Math.min(Math.max(Math.ceil(now.hours + now.minutes / 60), START_HOUR), END_HOUR - 1);
@@ -211,9 +215,11 @@ export default function CalendarApp() {
                 <span style={{ fontSize:11,fontWeight:700,padding:"6px 10px",borderRadius:999,background:"#fdf2e8",color:"#a35a3f" }}>{events.length} events total</span>
               </div>
             </div>
+            <div className="header-note">Plan your week faster with quick navigation, meaningful task sync, and a clean calendar layout.</div>
           </div>
-          <div style={{ position:"relative",zIndex:1,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap" }}>
+          <div className="btn-group" style={{ position:"relative",zIndex:1,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap" }}>
             <button onClick={openAddEvent} className="btn-primary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:"none",background:"#1a1a1a",color:"#fff",borderRadius:12,cursor:"pointer",boxShadow:"0 8px 20px rgba(26,26,26,0.15)" }}>+ Add Event</button>
+            <button onClick={goToToday} className="btn-secondary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:"2px solid #e8e5de",background:"#fff",color:"#1a1a1a",borderRadius:12,cursor:"pointer" }}>Today</button>
             <button onClick={clearAllEvents} className="btn-secondary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:"2px solid #e8e5de",background:"#fff",color:"#b86060",borderRadius:12,cursor:"pointer",opacity:!hasEvents?0.5:1,pointerEvents:!hasEvents?"none":"auto" }}>Clear All</button>
             <button onClick={toggleEnabled} className="btn-secondary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:`2px solid ${notifColor}`,background:"#fff",color:notifColor,borderRadius:12,cursor:"pointer",fontFamily:"monospace" }}>{notifLabel}</button>
           </div>
