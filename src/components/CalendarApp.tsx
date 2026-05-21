@@ -287,17 +287,21 @@ export default function CalendarApp() {
         </div>
 
         {/* DAY HEADERS */}
-        <div data-animate style={{ display:"flex",background:"#fbfaf8",borderBottom:"1px solid #e8e6e0",flexShrink:0 }}>
-          <div style={{ width:TIME_COL_W,flexShrink:0 }} />
-          {weekDays.map((day, i) => {
-            const isToday = toDateStr(day) === todayStr;
-            return (
-              <div key={i} style={{ flex:1,textAlign:"center",padding:"8px 0 10px",borderLeft:"1px solid #e8e6e0" }}>
-                <div style={{ fontSize:10,fontWeight:700,letterSpacing:"0.1em",color:isToday?"#c4943a":"#b0aea8",fontFamily:"monospace" }}>{DAY_LABELS[i]}</div>
-                <div style={{ width:30,height:30,borderRadius:"50%",background:isToday?"#c4943a":"transparent",color:isToday?"#fff":"#1a1a1a",display:"flex",alignItems:"center",justifyContent:"center",margin:"4px auto 0",fontSize:13,fontWeight:isToday?700:400 }}>{day.getDate()}</div>
-              </div>
-            );
-          })}
+        <div data-animate style={{ display:"flex",alignItems:"center",background:"#fbfaf8",borderBottom:"1px solid #e8e6e0",flexShrink:0,padding:"0 10px" }}>
+          <button onClick={() => shiftCalendarDay(-1)} className="btn-secondary" style={{ minWidth:44,padding:"10px 12px",fontSize:13,fontWeight:700,border:"2px solid #e8e5de",background:"#fff",color:"#1a1a1a",borderRadius:12,cursor:"pointer",marginRight:10 }}>&lt;</button>
+          <div style={{ display:"flex",flex:1,background:"#fbfaf8" }}>
+            <div style={{ width:TIME_COL_W,flexShrink:0 }} />
+            {weekDays.map((day, i) => {
+              const isToday = toDateStr(day) === todayStr;
+              return (
+                <div key={i} style={{ flex:1,textAlign:"center",padding:"8px 0 10px",borderLeft:"1px solid #e8e6e0" }}>
+                  <div style={{ fontSize:10,fontWeight:700,letterSpacing:"0.1em",color:isToday?"#c4943a":"#b0aea8",fontFamily:"monospace" }}>{DAY_LABELS[i]}</div>
+                  <div style={{ width:30,height:30,borderRadius:"50%",background:isToday?"#c4943a":"transparent",color:isToday?"#fff":"#1a1a1a",display:"flex",alignItems:"center",justifyContent:"center",margin:"4px auto 0",fontSize:13,fontWeight:isToday?700:400 }}>{day.getDate()}</div>
+                </div>
+              );
+            })}
+          </div>
+          <button onClick={() => shiftCalendarDay(1)} className="btn-secondary" style={{ minWidth:44,padding:"10px 12px",fontSize:13,fontWeight:700,border:"2px solid #e8e5de",background:"#fff",color:"#1a1a1a",borderRadius:12,cursor:"pointer",marginLeft:10 }}>&gt;</button>
         </div>
 
         {/* GRID */}
