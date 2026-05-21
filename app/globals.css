@@ -56,15 +56,34 @@ body::before { content: ""; position: fixed; inset: 0; background: radial-gradie
 	header { padding: 18px 16px !important; }
 	.stats-grid { gap: 12px; }
 	.calendar-columns { min-width: 100%; }
-	.day-column { min-width: 120px; }
+	.day-column { min-width: 110px; }
 	.time-column { min-width: 46px; }
 	.btn-primary, .btn-secondary { width: 100%; justify-content: center; }
 }
 
 @media (max-width: 520px) {
-	.day-column { min-width: 110px; }
+	.day-column { min-width: 100px; }
 	.time-column { min-width: 44px; }
 	.calendar-nav-button { padding: 10px 12px !important; }
+}
+
+.calendar-header-scroll {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.calendar-header-scroll > div {
+	display: flex;
+	min-width: 100%;
+}
+
+.calendar-header-scroll::-webkit-scrollbar {
+	height: 6px;
+}
+
+.calendar-header-scroll::-webkit-scrollbar-thumb {
+	background: rgba(136, 136, 136, 0.26);
+	border-radius: 99px;
 }
 
 @media (prefers-reduced-motion: reduce) {
