@@ -144,10 +144,11 @@ export default function CalendarApp() {
     persistEvents(makeSampleEvents(weekStart));
   }, [persistEvents, weekStart]);
   const clearAllEvents = useCallback(() => {
-    if (typeof window !== "undefined" && window.confirm("Are you sure you want to clear all events?")) {
+    if (typeof window !== "undefined" && window.confirm("Are you sure you want to clear the calendar and todo list?")) {
       persistEvents([]);
+      persistTodos([]);
     }
-  }, [persistEvents]);
+  }, [persistEvents, persistTodos]);
   const openAddEvent = useCallback(() => {
     const now = getPHDateParts(new Date());
     const startHour = Math.min(Math.max(Math.ceil(now.hours + now.minutes / 60), START_HOUR), END_HOUR - 1);
