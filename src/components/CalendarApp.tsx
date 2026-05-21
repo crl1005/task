@@ -51,41 +51,6 @@ export default function CalendarApp() {
     return () => clearInterval(t);
   }, []);
 
-  useEffect(() => {
-    if (!mounted || typeof window === "undefined") return;
-    const animateEls = Array.from(document.querySelectorAll<HTMLElement>(".animate-on-scroll"));
-    if (animateEls.length === 0) return;
-
-    const root = scrollRef.current;
-    const rootRect = () => root?.getBoundingClientRect();
-
-    const isVisible = (el: HTMLElement) => {
-      if (el.classList.contains("visible")) return false;
-      const rect = el.getBoundingClientRect();
-      const containerRect = rootRect();
-      const top = containerRect ? Math.max(rect.top, containerRect.top) : rect.top;
-      const bottom = containerRect ? Math.min(rect.bottom, containerRect.bottom) : rect.bottom;
-      return bottom > top + 8;
-    };
-
-    const revealElements = () => {
-      animateEls.forEach((el) => {
-        if (isVisible(el)) {
-          el.classList.add("visible");
-        }
-      });
-    };
-
-    revealElements();
-    const handleScroll = () => requestAnimationFrame(revealElements);
-    root?.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      root?.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [mounted]);
-
   const persistEvents = useCallback((evts: CalEvent[]) => {
     setEvents(evts);
     saveEventsToStorage(evts);
@@ -176,7 +141,7 @@ export default function CalendarApp() {
       <div style={{ display:"flex",flexDirection:"column",minHeight:"100vh",background:"linear-gradient(180deg, #f8f7f5 0%, #f0eded 100%)",overflow:"hidden",padding:"20px 18px" }}>
 
         {/* TOPBAR */}
-        <header className="animate-on-scroll" data-animate-on-scroll style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"24px 32px",minHeight:120,background:"linear-gradient(135deg, #fff 0%, #faf8f6 100%)",borderBottom:"2px solid #f0ede8",boxShadow:"0 24px 60px rgba(14,22,33,0.08)",borderRadius:28,flexShrink:0,zIndex:20,overflow:"hidden" }}>
+        <header style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"24px 32px",minHeight:120,background:"linear-gradient(135deg, #fff 0%, #faf8f6 100%)",borderBottom:"2px solid #f0ede8",boxShadow:"0 24px 60px rgba(14,22,33,0.08)",borderRadius:28,flexShrink:0,zIndex:20,overflow:"hidden" }}>
           <div style={{ position:"absolute",top:-18,left:-24,width:110,height:110,borderRadius:"50%",background:"#d7eefc",opacity:0.55 }} />
           <div style={{ position:"absolute",top:10,right:-30,width:140,height:140,borderRadius:"50%",background:"#f7e6e2",opacity:0.45 }} />
           <div style={{ position:"relative",zIndex:1,display:"flex",flexDirection:"column",gap:6 }}>
@@ -197,24 +162,24 @@ export default function CalendarApp() {
         </header>
 
         <div style={{ display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:14,marginTop:18,marginBottom:14 }}>
-          <div className="animate-on-scroll delay-1" data-animate-on-scroll style={{ padding:"22px 24px",borderRadius:22,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 12px 35px rgba(14,22,33,0.06)",transition:"all 0.3s ease" }}>
+          <div style={{ padding:"22px 24px",borderRadius:22,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 12px 35px rgba(14,22,33,0.06)",transition:"all 0.3s ease" }}>
             <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:"#a0998f",marginBottom:12,textTransform:"uppercase" }}>This Week</div>
             <div style={{ fontSize:24,fontWeight:700,color:"#1a1a1a",marginBottom:8,lineHeight:1.2 }}>{monthLabel}</div>
             <div style={{ fontSize:13,color:"#7a7360",lineHeight:1.6 }}>Your current weekly schedule overview</div>
           </div>
-          <div className="animate-on-scroll delay-2" data-animate-on-scroll style={{ padding:"22px 24px",borderRadius:22,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 12px 35px rgba(14,22,33,0.06)",transition:"all 0.3s ease" }}>
+          <div style={{ padding:"22px 24px",borderRadius:22,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 12px 35px rgba(14,22,33,0.06)",transition:"all 0.3s ease" }}>
             <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:"#a0998f",marginBottom:12,textTransform:"uppercase" }}>Events</div>
             <div style={{ fontSize:40,fontWeight:700,color:"#1a1a1a",marginBottom:4 }}>{events.length}</div>
             <div style={{ fontSize:13,color:"#7a7360",lineHeight:1.6 }}>Total scheduled events</div>
           </div>
-          <div className="animate-on-scroll delay-3" data-animate-on-scroll style={{ padding:"22px 24px",borderRadius:22,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 12px 35px rgba(14,22,33,0.06)",transition:"all 0.3s ease" }}>
+          <div style={{ padding:"22px 24px",borderRadius:22,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 12px 35px rgba(14,22,33,0.06)",transition:"all 0.3s ease" }}>
             <div style={{ fontSize:11,fontWeight:700,letterSpacing:"0.2em",color:"#a0998f",marginBottom:12,textTransform:"uppercase" }}>Tasks</div>
             <div style={{ fontSize:40,fontWeight:700,color:"#1a1a1a",marginBottom:4 }}>{todos.filter(t => !t.done).length}</div>
             <div style={{ fontSize:13,color:"#7a7360",lineHeight:1.6 }}>Active to-dos pending</div>
           </div>
         </div>
 
-        <div className="animate-on-scroll delay-4" data-animate-on-scroll style={{ padding:"24px 28px",borderRadius:28,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 18px 50px rgba(14,22,33,0.06)",marginBottom:16 }}>
+        <div style={{ padding:"24px 28px",borderRadius:28,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 18px 50px rgba(14,22,33,0.06)",marginBottom:16 }}>
           <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:16 }}>
             <div>
               <div style={{ fontSize:14,fontWeight:700,color:"#1a1a1a",marginBottom:4 }}>Todo List</div>
@@ -262,7 +227,7 @@ export default function CalendarApp() {
         </div>
 
         {/* DAY HEADERS */}
-        <div className="animate-on-scroll delay-5" data-animate-on-scroll style={{ display:"flex",background:"#fbfaf8",borderBottom:"1px solid #e8e6e0",flexShrink:0 }}>
+        <div style={{ display:"flex",background:"#fbfaf8",borderBottom:"1px solid #e8e6e0",flexShrink:0 }}>
           <div style={{ width:TIME_COL_W,flexShrink:0 }} />
           {weekDays.map((day, i) => {
             const isToday = toDateStr(day) === todayStr;
@@ -276,7 +241,7 @@ export default function CalendarApp() {
         </div>
 
         {/* GRID */}
-        <div ref={scrollRef} className="scroll-container" style={{ flex:1,overflowY:"auto",overflowX:"hidden" }}>
+        <div ref={scrollRef} style={{ flex:1,overflowY:"auto",overflowX:"hidden" }}>
           <div style={{ display:"flex",minHeight:(END_HOUR-START_HOUR)*HOUR_HEIGHT }}>
             <div style={{ width:TIME_COL_W,flexShrink:0,position:"relative",userSelect:"none" }}>
               {hours.map((h) => (
@@ -316,7 +281,7 @@ export default function CalendarApp() {
                     const top = (ev.startHour - START_HOUR) * HOUR_HEIGHT + 1;
                     const height = Math.max((ev.endHour - ev.startHour) * HOUR_HEIGHT - 3, 18);
                     return (
-                      <div key={ev.id} className="event-chip animate-on-scroll delay-3" data-animate-on-scroll onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); }}
+                      <div key={ev.id} className="event-chip" onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); }}
                         style={{ position:"absolute",top,left:`calc(${pos.left*100}% + 3px)`,width:`calc(${pos.width*100}% - 6px)`,height,background:ev.lightColor,borderLeft:`3px solid ${ev.color}`,borderRadius:"0 12px 12px 0",padding:"6px 10px 6px 8px",cursor:"pointer",zIndex:3,overflow:"hidden",transition:"filter 0.1s, transform 0.2s",boxShadow:"0 8px 18px rgba(17,22,30,0.08)" }}>
                         <div style={{ fontSize:11,fontWeight:600,color:ev.color,lineHeight:1.25,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:height<32?"nowrap":"normal" }}>{ev.title}</div>
                         {height >= 30 && <div style={{ fontSize:10,color:ev.color,opacity:0.7,marginTop:1,fontFamily:"monospace",whiteSpace:"nowrap" }}>{fmtHour(ev.startHour)} – {fmtHour(ev.endHour)}</div>}
