@@ -346,9 +346,9 @@ export default function CalendarApp() {
         {/* DAY HEADERS */}
         <div className="calendar-header" data-animate style={{ display:"flex",alignItems:"center",background:"#fbfaf8",borderBottom:"1px solid #e8e6e0",flexShrink:0,padding:"0 10px" }}>
           <button onClick={() => shiftCalendarDay(-1)} className="calendar-nav-button" style={{ minWidth:44,padding:"10px 12px",fontSize:13,fontWeight:700,border:"2px solid #e8e5de",background:"#fff",color:"#1a1a1a",borderRadius:12,cursor:"pointer",marginRight:10 }}>&lt;</button>
+          <div style={{ width: TIME_COL_W, flexShrink: 0 }} />
           <div ref={headerScrollRef} className="calendar-header-scroll" style={{ display:"flex",flex:1,overflowX:"auto" }}>
             <div style={{ display:"flex",minWidth:"max-content",background:"#fbfaf8" }}>
-              <div style={{ width:TIME_COL_W,flexShrink:0 }} />
               {weekDays.map((day, i) => {
                 const isToday = toDateStr(day) === todayStr;
                 return (
