@@ -77,6 +77,25 @@ body::before { content: ""; position: fixed; inset: 0; background: radial-gradie
 	min-width: 100%;
 }
 
+.calendar-header-cell {
+	min-width: 150px;
+	flex: 0 0 150px;
+}
+
+@media (max-width: 640px) {
+	.calendar-header-cell {
+		min-width: 110px;
+		flex: 0 0 110px;
+	}
+}
+
+@media (max-width: 520px) {
+	.calendar-header-cell {
+		min-width: 100px;
+		flex: 0 0 100px;
+	}
+}
+
 .calendar-header-scroll::-webkit-scrollbar {
 	height: 6px;
 }

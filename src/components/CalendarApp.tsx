@@ -23,6 +23,8 @@ export default function CalendarApp() {
   const [addForm, setAddForm] = useState<AddFormState | null>(null);
   const [nowTime, setNowTime] = useState(new Date());
   const scrollRef = useRef<HTMLDivElement>(null);
+  const headerScrollRef = useRef<HTMLDivElement>(null);
+  const syncScrollRef = useRef(false);
   const scrolledRef = useRef(false);
   const { permission, enabled, toggleEnabled } = useNotifications(events);
 
@@ -49,6 +51,34 @@ export default function CalendarApp() {
   useEffect(() => {
     const t = setInterval(() => setNowTime(new Date()), 30_000);
     return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    const calendar = scrollRef.current;
+    const header = headerScrollRef.current;
+    if (!calendar || !header) return;
+
+    const syncFromCalendar = () => {
+      if (syncScrollRef.current) return;
+      syncScrollRef.current = true;
+      header.scrollLeft = calendar.scrollLeft;
+      syncScrollRef.current = false;
+    };
+
+    const syncFromHeader = () => {
+      if (syncScrollRef.current) return;
+      syncScrollRef.current = true;
+      calendar.scrollLeft = header.scrollLeft;
+      syncScrollRef.current = false;
+    };
+
+    calendar.addEventListener("scroll", syncFromCalendar, { passive: true });
+    header.addEventListener("scroll", syncFromHeader, { passive: true });
+
+    return () => {
+      calendar.removeEventListener("scroll", syncFromCalendar);
+      header.removeEventListener("scroll", syncFromHeader);
+    };
   }, []);
 
   // Reveal animations for page scroll — observes elements with `data-animate`.
@@ -321,13 +351,13 @@ export default function CalendarApp() {
         {/* DAY HEADERS */}
         <div className="calendar-header" data-animate style={{ display:"flex",alignItems:"center",background:"#fbfaf8",borderBottom:"1px solid #e8e6e0",flexShrink:0,padding:"0 10px" }}>
           <button onClick={() => shiftCalendarDay(-1)} className="calendar-nav-button" style={{ minWidth:44,padding:"10px 12px",fontSize:13,fontWeight:700,border:"2px solid #e8e5de",background:"#fff",color:"#1a1a1a",borderRadius:12,cursor:"pointer",marginRight:10 }}>&lt;</button>
-          <div className="calendar-header-scroll" style={{ display:"flex",flex:1,overflowX:"auto",padding:"0 4px" }}>
+          <div ref={headerScrollRef} className="calendar-header-scroll" style={{ display:"flex",flex:1,overflowX:"auto",padding:"0 4px" }}>
             <div style={{ display:"flex",minWidth:"100%",background:"#fbfaf8" }}>
               <div style={{ width:TIME_COL_W,flexShrink:0 }} />
               {weekDays.map((day, i) => {
                 const isToday = toDateStr(day) === todayStr;
                 return (
-                  <div key={i} style={{ minWidth:120,flex:"0 0 120px",textAlign:"center",padding:"8px 0 10px",borderLeft:"1px solid #e8e6e0" }}>
+                  <div key={i} className="calendar-header-cell" style={{ textAlign:"center",padding:"8px 0 10px",borderLeft:"1px solid #e8e6e0" }}>
                   <div style={{ fontSize:10,fontWeight:700,letterSpacing:"0.1em",color:isToday?"#c4943a":"#b0aea8",fontFamily:"monospace" }}>{DAY_LABELS[i]}</div>
                   <div style={{ width:30,height:30,borderRadius:"50%",background:isToday?"#c4943a":"transparent",color:isToday?"#fff":"#1a1a1a",display:"flex",alignItems:"center",justifyContent:"center",margin:"4px auto 0",fontSize:13,fontWeight:isToday?700:400 }}>{day.getDate()}</div>
                 </div>
