@@ -235,8 +235,6 @@ export default function CalendarApp() {
     ? `${MONTHS[weekStart.getMonth()]} ${weekStart.getFullYear()}`
     : `${MONTHS[weekStart.getMonth()].slice(0, 3)} – ${MONTHS[weekEnd.getMonth()].slice(0, 3)} ${weekEnd.getFullYear()}`;
 
-  const eventsForDay = (date: Date) => events.filter((e) => e.date === toDateStr(date)).sort((a, b) => a.startHour - b.startHour);
-
   const onSlotClick = (e: React.MouseEvent<HTMLDivElement>, date: Date) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const h = Math.floor((e.clientY - rect.top) / HOUR_HEIGHT) + START_HOUR;
@@ -352,7 +350,7 @@ export default function CalendarApp() {
         {/* DAY HEADERS */}
         <div className="calendar-header" data-animate style={{ display:"flex",alignItems:"center",background:"#fbfaf8",borderBottom:"1px solid #e8e6e0",flexShrink:0,padding:"0 10px" }}>
           <button onClick={() => shiftCalendarDay(-1)} className="calendar-nav-button" style={{ minWidth:44,padding:"10px 12px",fontSize:13,fontWeight:700,border:"2px solid #e8e5de",background:"#fff",color:"#1a1a1a",borderRadius:12,cursor:"pointer",marginRight:10 }}>&lt;</button>
-          <div ref={headerScrollRef} className="calendar-header-scroll" style={{ display:"flex",flex:1,overflowX:"auto",padding:"0 4px" }}>
+          <div ref={headerScrollRef} className="calendar-header-scroll" style={{ display:"flex",flex:1,overflowX:"auto" }}>
             <div style={{ display:"flex",minWidth:"100%",background:"#fbfaf8" }}>
               <div style={{ width:TIME_COL_W,flexShrink:0 }} />
               {weekDays.map((day, i) => {
@@ -386,7 +384,6 @@ export default function CalendarApp() {
               const isToday = dayStr === todayStr;
               return (
                 <div key={di} className="day-column" style={{
-                  flex:1,
                   position:"relative",
                   borderLeft:"1px solid #e8e6e0",
                   background:isToday?"#fefdf8":"#fff",

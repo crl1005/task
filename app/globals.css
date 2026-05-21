@@ -22,8 +22,9 @@ body::before { content: ""; position: fixed; inset: 0; background: radial-gradie
 .todo-panel { width: 100%; }
 .calendar-grid { width: 100%; overflow-x: auto; overflow-y: auto; touch-action: pan-y pinch-zoom; overscroll-behavior-x: contain; background: rgba(255,255,255,0.55); border-top: 1px solid rgba(232,230,224,0.95); border-bottom: 1px solid rgba(232,230,224,0.95); }
 .calendar-columns { display: flex; min-width: max-content; }
-.time-column { min-width: 60px; flex: 0 0 60px; background: rgba(255,255,255,0.88); }
-.day-column { min-width: 150px; flex: 0 0 150px; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(247,247,249,0.97)); }
+.time-column { min-width: 60px; width: 60px; flex: 0 0 60px; background: rgba(255,255,255,0.88); }
+.day-column, .calendar-header-cell { min-width: 150px; width: 150px; flex: 0 0 150px; }
+.day-column { background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(247,247,249,0.97)); }
 .day-column:hover { background: rgba(255,255,255,1); }
 .event-chip { transition: transform 0.2s ease, box-shadow 0.2s ease; border-radius: 16px; will-change: transform, opacity; }
 
@@ -77,28 +78,26 @@ body::before { content: ""; position: fixed; inset: 0; background: radial-gradie
 	min-width: max-content;
 }
 
-.calendar-header-cell {
-	min-width: 150px;
-	flex: 0 0 150px;
-}
-
 @media (max-width: 960px) {
-	.calendar-header-cell {
+	.day-column, .calendar-header-cell {
 		min-width: 130px;
+		width: 130px;
 		flex: 0 0 130px;
 	}
 }
 
 @media (max-width: 640px) {
-	.calendar-header-cell {
+	.day-column, .calendar-header-cell {
 		min-width: 110px;
+		width: 110px;
 		flex: 0 0 110px;
 	}
 }
 
 @media (max-width: 520px) {
-	.calendar-header-cell {
+	.day-column, .calendar-header-cell {
 		min-width: 100px;
+		width: 100px;
 		flex: 0 0 100px;
 	}
 }
