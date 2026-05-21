@@ -86,19 +86,20 @@ export default function CalendarApp() {
     if (!todoText.trim()) return;
     const ts = Date.now();
     const todoId = `t${ts}`;
+    const dueHour = todoDueDate ? Math.max(START_HOUR, Math.min(todoDueHour, END_HOUR - 1)) : undefined;
     const todo: TodoItem = {
       id: todoId,
       text: todoText.trim(),
       done: false,
       dueDate: todoDueDate || undefined,
-      dueHour: todoDueDate ? todoDueHour : undefined,
+      dueHour,
     };
 
-    if (todo.dueDate) {
+    if (todo.dueDate && todo.dueHour != null) {
       const eventId = `e${ts}`;
       todo.eventId = eventId;
       const palette = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-      const startHour = todo.dueHour ?? 9;
+      const startHour = todo.dueHour;
       const event: CalEvent = {
         id: eventId,
         title: todo.text,
@@ -115,7 +116,7 @@ export default function CalendarApp() {
     persistTodos([...todos, todo]);
     setTodoText("");
     setTodoDueDate("");
-    setTodoDueHour(9);
+    setTodoDueHour(START_HOUR);
   }, [todoText, todoDueDate, todoDueHour, todos, events, persistTodos, persistEvents]);
 
   const toggleTodo = useCallback((id: string) => {
@@ -245,7 +246,7 @@ export default function CalendarApp() {
               <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
                 <input type="date" value={todoDueDate} onChange={(e) => setTodoDueDate(e.target.value)} min={minDueDate} max={maxDueDate} style={{ padding:"10px 12px",border:"1px solid #e7e3dd",borderRadius:10,background:"#faf9f7",color:"#1a1a1a",fontSize:13 }} />
                 <select value={todoDueHour} onChange={(e) => setTodoDueHour(parseInt(e.target.value))} style={{ padding:"10px 12px",border:"1px solid #e7e3dd",borderRadius:10,background:"#faf9f7",color:"#1a1a1a",fontSize:13 }}>
-                  {Array.from({length:24},(_, i) => i).map((h) => <option key={h} value={h}>{fmtHour(h)}</option>)}
+                  {Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i).map((h) => <option key={h} value={h}>{fmtHour(h)}</option>)}
                 </select>
               </div>
             </div>
