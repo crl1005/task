@@ -152,7 +152,7 @@ export default function CalendarApp() {
   }, [persistEvents, persistTodos]);
 
   const shiftCalendarDay = useCallback((direction: number) => {
-    setRefDate((current) => addDays(current, direction));
+    setRefDate((current) => addDays(current, direction * 7));
   }, []);
 
   const openAddEvent = useCallback(() => {
