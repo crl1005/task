@@ -283,6 +283,7 @@ export default function CalendarApp() {
           <div className="btn-group" style={{ position:"relative",zIndex:1,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap" }}>
             <button onClick={openAddEvent} className="btn-primary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:"none",background:"#1a1a1a",color:"#fff",borderRadius:12,cursor:"pointer",boxShadow:"0 8px 20px rgba(26,26,26,0.15)" }}>+ Add Event</button>
             <button onClick={goToToday} className="btn-secondary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:"2px solid #e8e5de",background:"#fff",color:"#1a1a1a",borderRadius:12,cursor:"pointer" }}>Today</button>
+            <button onClick={resetSampleEvents} className="btn-secondary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:"2px solid #e8e5de",background:"#fff",color:"#1a1a1a",borderRadius:12,cursor:"pointer" }}>Sample Week</button>
             <button onClick={clearAllEvents} className="btn-secondary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:"2px solid #e8e5de",background:"#fff",color:"#b86060",borderRadius:12,cursor:"pointer",opacity:!hasEvents?0.5:1,pointerEvents:!hasEvents?"none":"auto" }}>Clear All</button>
             <button onClick={toggleEnabled} className="btn-secondary" style={{ padding:"12px 22px",fontSize:13,fontWeight:700,letterSpacing:"0.05em",border:`2px solid ${notifColor}`,background:"#fff",color:notifColor,borderRadius:12,cursor:"pointer",fontFamily:"monospace" }}>{notifLabel}</button>
           </div>
@@ -357,10 +358,10 @@ export default function CalendarApp() {
               {weekDays.map((day, i) => {
                 const isToday = toDateStr(day) === todayStr;
                 return (
-                  <div key={i} className="calendar-header-cell" style={{ textAlign:"center",padding:"8px 0 10px",borderLeft:"1px solid #e8e6e0" }}>
-                  <div style={{ fontSize:10,fontWeight:700,letterSpacing:"0.1em",color:isToday?"#c4943a":"#b0aea8",fontFamily:"monospace" }}>{DAY_LABELS[i]}</div>
-                  <div style={{ width:30,height:30,borderRadius:"50%",background:isToday?"#c4943a":"transparent",color:isToday?"#fff":"#1a1a1a",display:"flex",alignItems:"center",justifyContent:"center",margin:"4px auto 0",fontSize:13,fontWeight:isToday?700:400 }}>{day.getDate()}</div>
-                </div>
+                  <div key={i} className="calendar-header-cell" style={{ textAlign:"center",padding:"8px 0 10px",borderLeft:"1px solid #e8e6e0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center" }}>
+                    <div style={{ fontSize:10,fontWeight:700,letterSpacing:"0.1em",color:isToday?"#c4943a":"#b0aea8",fontFamily:"monospace" }}>{DAY_LABELS[i]}</div>
+                    <div style={{ width:30,height:30,borderRadius:"50%",background:isToday?"#c4943a":"transparent",color:isToday?"#fff":"#1a1a1a",display:"flex",alignItems:"center",justifyContent:"center",margin:"4px auto 0",fontSize:13,fontWeight:isToday?700:400 }}>{day.getDate()}</div>
+                  </div>
               );
             })}
             </div>
