@@ -6,7 +6,7 @@ import { useNotifications } from "./useNotifications";
 import AddEventModal from "./AddEventModal";
 import EventDetailModal from "./EventDetailModal";
 
-interface TodoItem { id: string; text: string; done: boolean; dueDate?: string; dueHour?: number; }
+interface TodoItem { id: string; text: string; done: boolean; dueDate?: string; dueHour?: number; eventId?: string; }
 
 const TODO_STORAGE_KEY = "schedule_todos_v1";
 const hours = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
@@ -84,19 +84,51 @@ export default function CalendarApp() {
 
   const addTodo = useCallback(() => {
     if (!todoText.trim()) return;
-    persistTodos([...todos, { id: `t${Date.now()}`, text: todoText.trim(), done: false, dueDate: todoDueDate || undefined, dueHour: todoDueDate ? todoDueHour : undefined }]);
+    const ts = Date.now();
+    const todoId = `t${ts}`;
+    const todo: TodoItem = {
+      id: todoId,
+      text: todoText.trim(),
+      done: false,
+      dueDate: todoDueDate || undefined,
+      dueHour: todoDueDate ? todoDueHour : undefined,
+    };
+
+    if (todo.dueDate) {
+      const eventId = `e${ts}`;
+      todo.eventId = eventId;
+      const palette = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+      const startHour = todo.dueHour ?? 9;
+      const event: CalEvent = {
+        id: eventId,
+        title: todo.text,
+        startHour,
+        endHour: Math.min(startHour + 1, END_HOUR),
+        color: palette.bg,
+        lightColor: palette.light,
+        date: todo.dueDate,
+      };
+      persistEvents([...events, event]);
+      setRefDate(getWeekStart(new Date(todo.dueDate)));
+    }
+
+    persistTodos([...todos, todo]);
     setTodoText("");
     setTodoDueDate("");
     setTodoDueHour(9);
-  }, [todoText, todoDueDate, todoDueHour, todos, persistTodos]);
+  }, [todoText, todoDueDate, todoDueHour, todos, events, persistTodos, persistEvents]);
 
   const toggleTodo = useCallback((id: string) => {
     persistTodos(todos.map((todo) => todo.id === id ? { ...todo, done: !todo.done } : todo));
   }, [todos, persistTodos]);
 
   const deleteTodo = useCallback((id: string) => {
+    const todoToRemove = todos.find((todo) => todo.id === id);
+    if (todoToRemove?.eventId) {
+      persistEvents(events.filter((event) => event.id !== todoToRemove.eventId));
+    }
     persistTodos(todos.filter((todo) => todo.id !== id));
-  }, [todos, persistTodos]);
+  }, [todos, events, persistTodos, persistEvents]);
 
   const clearCompletedTodos = useCallback(() => {
     persistTodos(todos.filter((todo) => !todo.done));
@@ -157,7 +189,7 @@ export default function CalendarApp() {
   return (
     <>
       <style>{`.btn-primary{transition:all 0.25s ease}.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 28px rgba(26,26,26,0.18)!important}.btn-secondary:hover:not(:disabled){background:#f5f3f0!important;transform:translateY(-1px)}.btn-danger:hover:not(:disabled){background:#f5e6e6!important;transform:translateY(-1px)}.event-chip:hover{filter:brightness(0.93);transform:scale(1.01)}`}</style>
-      <div className="site-container" data-animate style={{ display:"flex",flexDirection:"column",minHeight:"100vh",background:"linear-gradient(180deg, #f8f7f5 0%, #f0eded 100%)",overflow:"visible",padding:"20px 18px" }}>
+      <div className="site-container page-shell" data-animate style={{ display:"flex",flexDirection:"column",minHeight:"100vh",background:"linear-gradient(180deg, #f8f7f5 0%, #f0eded 100%)",overflow:"visible",padding:"20px 18px" }}>
 
         {/* TOPBAR */}
         <header data-animate style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"24px 32px",minHeight:120,background:"linear-gradient(135deg, #fff 0%, #faf8f6 100%)",borderBottom:"2px solid #f0ede8",boxShadow:"0 24px 60px rgba(14,22,33,0.08)",borderRadius:28,flexShrink:0,zIndex:20,overflow:"hidden" }}>
@@ -198,7 +230,7 @@ export default function CalendarApp() {
           </div>
         </div>
 
-        <div data-animate style={{ padding:"24px 28px",borderRadius:28,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 18px 50px rgba(14,22,33,0.06)",marginBottom:16 }}>
+        <div className="todo-panel" data-animate style={{ padding:"24px 28px",borderRadius:28,background:"linear-gradient(135deg, #fff 0%, #faf9f7 100%)",border:"2px solid #f0ede8",boxShadow:"0 18px 50px rgba(14,22,33,0.06)",marginBottom:16 }}>
           <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap",marginBottom:16 }}>
             <div>
               <div style={{ fontSize:14,fontWeight:700,color:"#1a1a1a",marginBottom:4 }}>Todo List</div>
@@ -260,9 +292,9 @@ export default function CalendarApp() {
         </div>
 
         {/* GRID */}
-        <div ref={scrollRef} data-animate style={{ flex:1,overflowY:"auto",overflowX:"hidden" }}>
-          <div style={{ display:"flex",minHeight:(END_HOUR-START_HOUR)*HOUR_HEIGHT }}>
-            <div style={{ width:TIME_COL_W,flexShrink:0,position:"relative",userSelect:"none" }}>
+        <div ref={scrollRef} className="calendar-grid" data-animate style={{ flex:1,overflowY:"auto",overflowX:"hidden" }}>
+          <div className="calendar-columns" style={{ display:"flex",minHeight:(END_HOUR-START_HOUR)*HOUR_HEIGHT }}>
+            <div className="time-column" style={{ width:TIME_COL_W,flexShrink:0,position:"relative",userSelect:"none" }}>
               {hours.map((h) => (
                 <div key={h} style={{ position:"absolute",top:(h-START_HOUR)*HOUR_HEIGHT-8,right:8,fontSize:10,fontFamily:"monospace",color:"#c0bdb7",letterSpacing:"0.04em",whiteSpace:"nowrap" }}>{fmtHour(h)}</div>
               ))}
@@ -274,7 +306,7 @@ export default function CalendarApp() {
               const layout = computeLayout(dayEvts);
               const isToday = dayStr === todayStr;
               return (
-                <div key={di} style={{ flex:1,position:"relative",borderLeft:"1px solid #e8e6e0",background:isToday?"#fefdf8":"#fff",cursor:"crosshair" }}
+                <div key={di} className="day-column" style={{ flex:1,position:"relative",borderLeft:"1px solid #e8e6e0",background:isToday?"#fefdf8":"#fff",cursor:"crosshair" }}
                   onClick={(e) => { if (!(e.target as HTMLElement).closest(".event-chip")) onSlotClick(e, day); }}>
                   {hours.map((h) => (
                     <React.Fragment key={h}>
