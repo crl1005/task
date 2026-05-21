@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { CalEvent, AddFormState, HOUR_HEIGHT, START_HOUR, END_HOUR, TIME_COL_W, DAY_LABELS, MONTHS, PALETTE } from "./types";
 import { getWeekStart, addDays, toDateStr, fmtHour, computeLayout, makeSampleEvents, loadEventsFromStorage, saveEventsToStorage, getPHDateParts } from "./utils";
 import { useNotifications } from "./useNotifications";
@@ -135,12 +135,45 @@ export default function CalendarApp() {
     persistTodos(todos.filter((todo) => !todo.done));
   }, [todos, persistTodos]);
 
-  const weekStart = getWeekStart(refDate);
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  const today = new Date();
+  const weekStart = useMemo(() => getWeekStart(refDate), [refDate]);
+  const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
+  const today = nowTime;
   const todayStr = toDateStr(today);
   const minDueDate = todayStr;
   const maxDueDate = toDateStr(addDays(today, 30));
+
+  const eventsByDate = useMemo(() => {
+    const map = new Map<string, { events: CalEvent[]; layout: Map<string, { left: number; width: number }> }>();
+    weekDays.forEach((day) => {
+      const dateKey = toDateStr(day);
+      const dayEvts = events.filter((event) => event.date === dateKey).sort((a, b) => a.startHour - b.startHour);
+      map.set(dateKey, { events: dayEvts, layout: computeLayout(dayEvts) });
+    });
+    return map;
+  }, [events, weekDays]);
+
+  const todosByDate = useMemo(() => {
+    const map = new Map<string, TodoItem[]>();
+    todos.forEach((todo) => {
+      if (todo.dueDate && !todo.done) {
+        const bucket = map.get(todo.dueDate) ?? [];
+        bucket.push(todo);
+        map.set(todo.dueDate, bucket);
+      }
+    });
+    map.forEach((list) => list.sort((a, b) => (a.dueHour || 0) - (b.dueHour || 0)));
+    return map;
+  }, [todos]);
+
+  const sortedTodos = useMemo(() => {
+    return [...todos].sort((a, b) => {
+      if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate) || (a.dueHour || 0) - (b.dueHour || 0);
+      if (a.dueDate) return -1;
+      if (b.dueDate) return 1;
+      return 0;
+    });
+  }, [todos]);
+
   const resetSampleEvents = useCallback(() => {
     persistEvents(makeSampleEvents(weekStart));
   }, [persistEvents, weekStart]);
@@ -266,12 +299,7 @@ export default function CalendarApp() {
           <div style={{ display:"grid",rowGap:10 }}>
             {todos.length === 0 ? (
               <div style={{ padding:"16px 18px",borderRadius:16,background:"#fbfaf8",border:"1px dashed #e7e3dd",color:"#6f6a61" }}>No tasks yet. Add a quick todo to keep your day on track.</div>
-            ) : todos.sort((a, b) => {
-              if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate) || (a.dueHour || 0) - (b.dueHour || 0);
-              if (a.dueDate) return -1;
-              if (b.dueDate) return 1;
-              return 0;
-            }).map((todo) => {
+            ) : sortedTodos.map((todo) => {
               const isOverdue = todo.dueDate && todo.dueDate < todayStr;
               const isDueToday = todo.dueDate === todayStr;
               return (
@@ -318,9 +346,10 @@ export default function CalendarApp() {
             </div>
             {weekDays.map((day, di) => {
               const dayStr = toDateStr(day);
-              const dayEvts = eventsForDay(day);
-              const dayTodos = todos.filter((t) => t.dueDate === dayStr && !t.done).sort((a, b) => (a.dueHour || 0) - (b.dueHour || 0));
-              const layout = computeLayout(dayEvts);
+              const dateData = eventsByDate.get(dayStr);
+              const dayEvts = dateData?.events ?? [];
+              const layout = dateData?.layout ?? new Map<string, { left: number; width: number }>();
+              const dayTodos = todosByDate.get(dayStr) ?? [];
               const isToday = dayStr === todayStr;
               return (
                 <div key={di} className="day-column" style={{ flex:1,position:"relative",borderLeft:"1px solid #e8e6e0",background:isToday?"#fefdf8":"#fff",cursor:"crosshair" }}
